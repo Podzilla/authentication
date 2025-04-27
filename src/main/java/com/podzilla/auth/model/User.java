@@ -35,7 +35,7 @@ public class User {
     @NotBlank(message = "Name is required")
     private String name;
 
-    @NotBlank(message = "email is required")
+    @NotBlank(message = "Email is required")
     @Email
     @Column(unique = true)
     private String email;
