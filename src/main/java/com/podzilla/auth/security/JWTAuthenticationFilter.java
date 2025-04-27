@@ -42,8 +42,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         try {
-            String jwt = jwtService.getJwtFromCookie(request);
-            jwtService.validateToken(jwt);
+            String jwt = jwtService.getAccessTokenFromCookie(request);
+            jwtService.validateAccessToken(jwt);
             String userEmail = jwtService.extractEmail();
 
             UserDetails userDetails =

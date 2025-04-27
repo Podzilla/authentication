@@ -1,19 +1,28 @@
 package com.podzilla.auth.service;
 
+import com.podzilla.auth.model.RefreshToken;
+import com.podzilla.auth.model.User;
+import com.podzilla.auth.repository.RefreshTokenRepository;
+import com.podzilla.auth.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.persistence.EntityExistsException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.WebUtils;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
+import java.time.temporal.TemporalAmount;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JWTService {
@@ -27,29 +36,92 @@ public class JWTService {
 
     private Claims claims;
 
-    private static final Integer EXPIRATION_TIME = 60 * 1000;
-    private static final Integer MAX_AGE = 24 * 60 * 60;
+    private static final Integer ACCESS_TOKEN_EXPIRATION_TIME = 60 * 1000;
+    private static final Integer ACCESS_TOKEN_COOKIE_EXPIRATION_TIME = 60 * 30;
+    private static final TemporalAmount REFRESH_TOKEN_EXPIRATION_TIME =
+            java.time.Duration.ofDays(10);
+    private static final Integer REFRESH_TOKEN_COOKIE_EXPIRATION_TIME =
+            60 * 60 * 24 * 10;
 
-    public void generateToken(final String email,
-                              final HttpServletResponse response) {
+    private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    public JWTService(final UserRepository userRepository,
+                      final RefreshTokenRepository refreshTokenRepository) {
+        this.userRepository = userRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
+
+    public void generateAccessToken(final String email,
+                                    final HttpServletResponse response) {
         String jwt = Jwts.builder()
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis()
-                        + jwtExpiresMinutes * EXPIRATION_TIME))
+                        + jwtExpiresMinutes * ACCESS_TOKEN_EXPIRATION_TIME))
                 .signWith(getSignInKey())
                 .compact();
 
-        Cookie cookie = new Cookie("JWT", jwt);
+        Cookie cookie = new Cookie("accessToken", jwt);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
-        cookie.setMaxAge(MAX_AGE);
+        cookie.setMaxAge(ACCESS_TOKEN_COOKIE_EXPIRATION_TIME);
         response.addCookie(cookie);
     }
 
-    public String getJwtFromCookie(final HttpServletRequest request) {
-        Cookie cookie = WebUtils.getCookie(request, "JWT");
+    public void generateRefreshToken(final String email,
+                                     final HttpServletResponse response) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityExistsException("User not found"));
+
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUser(user);
+        refreshToken.setExpiresAt(Instant.now().plus(
+                REFRESH_TOKEN_EXPIRATION_TIME));
+        refreshTokenRepository.save(refreshToken);
+
+        String refreshTokenString = refreshToken.getId().toString();
+        addRefreshTokenToCookie(refreshTokenString, response);
+    }
+
+    public String renewRefreshToken(final String refreshToken,
+                                  final HttpServletResponse response) {
+        RefreshToken token =
+                refreshTokenRepository
+                        .findByIdAndExpiresAtAfter(
+                                UUID.fromString(refreshToken), Instant.now())
+                        .orElseThrow(() ->
+                                new ValidationException(
+                                        "Invalid refresh token"));
+
+        token.setExpiresAt(Instant.now());
+        refreshTokenRepository.save(token);
+
+        RefreshToken newRefreshToken = new RefreshToken();
+        newRefreshToken.setUser(token.getUser());
+        newRefreshToken.setExpiresAt(Instant.now().plus(
+                REFRESH_TOKEN_EXPIRATION_TIME));
+        refreshTokenRepository.save(newRefreshToken);
+
+        String newRefreshTokenString = newRefreshToken.getId().toString();
+        addRefreshTokenToCookie(newRefreshTokenString, response);
+
+        return token.getUser().getEmail();
+    }
+
+    private void addRefreshTokenToCookie(final String refreshToken,
+                                         final HttpServletResponse response) {
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/api/auth/refresh-token");
+        cookie.setMaxAge(REFRESH_TOKEN_COOKIE_EXPIRATION_TIME);
+        response.addCookie(cookie);
+    }
+
+    public String getAccessTokenFromCookie(final HttpServletRequest request) {
+        Cookie cookie = WebUtils.getCookie(request, "accessToken");
         if (cookie != null) {
             return cookie.getValue();
         }
@@ -57,7 +129,15 @@ public class JWTService {
 
     }
 
-    public void validateToken(final String token) throws JwtException {
+    public String getRefreshTokenFromCookie(final HttpServletRequest request) {
+        Cookie cookie = WebUtils.getCookie(request, "refreshToken");
+        if (cookie != null) {
+            return cookie.getValue();
+        }
+        return null;
+    }
+
+    public void validateAccessToken(final String token) throws JwtException {
         try {
             claims = Jwts.parser()
                     .verifyWith(getSignInKey())
@@ -71,9 +151,18 @@ public class JWTService {
         }
     }
 
-    public void removeTokenFromCookie(final HttpServletResponse response) {
+    public void removeAccessTokenFromCookie(
+            final HttpServletResponse response) {
         Cookie cookie = new Cookie("JWT", null);
         cookie.setPath("/");
+
+        response.addCookie(cookie);
+    }
+
+    public void removeRefreshTokenFromCookie(
+            final HttpServletResponse response) {
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setPath("/api/auth/refresh-token");
 
         response.addCookie(cookie);
     }

@@ -1,18 +1,15 @@
 package com.podzilla.auth.service;
 
-import com.podzilla.auth.dto.AuthenticationResponse;
 import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
 import com.podzilla.auth.model.ERole;
-import com.podzilla.auth.model.RefreshToken;
 import com.podzilla.auth.model.Role;
 import com.podzilla.auth.model.User;
-import com.podzilla.auth.repository.RefreshTokenRepository;
 import com.podzilla.auth.repository.RoleRepository;
 import com.podzilla.auth.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.ValidationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,10 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.Collections;
-import java.util.UUID;
 
 
 @Service
@@ -35,28 +29,22 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final JWTService jwtService;
     private final RoleRepository roleRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-
-    private static final TemporalAmount EXPIRES_IN =
-            java.time.Duration.ofDays(10);
 
     public AuthenticationService(
             final AuthenticationManager authenticationManager,
             final PasswordEncoder passwordEncoder,
             final UserRepository userRepository,
             final JWTService jwtService,
-            final RoleRepository roleRepository,
-            final RefreshTokenRepository refreshTokenRepository) {
+            final RoleRepository roleRepository) {
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.roleRepository = roleRepository;
-        this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public AuthenticationResponse login(final LoginRequest loginRequest,
-                                        final HttpServletResponse response) {
+    public String login(final LoginRequest loginRequest,
+                        final HttpServletResponse response) {
 
         Authentication authenticationRequest =
                 UsernamePasswordAuthenticationToken.
@@ -68,20 +56,12 @@ public class AuthenticationService {
 
         SecurityContextHolder.getContext().
                 setAuthentication(authenticationResponse);
-        jwtService.generateToken(loginRequest.getEmail(), response);
+        jwtService.generateAccessToken(loginRequest.getEmail(), response);
+        jwtService.generateRefreshToken(loginRequest.getEmail(), response);
         UserDetails userDetails =
                 (UserDetails) authenticationResponse.getPrincipal();
 
-        User user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new EntityExistsException("User not found"));
-
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setUser(user);
-        refreshToken.setExpiresAt(Instant.now().plus(EXPIRES_IN));
-        refreshTokenRepository.save(refreshToken);
-
-        return new AuthenticationResponse(userDetails.getUsername(),
-                refreshToken.getId());
+        return userDetails.getUsername();
     }
 
     public void registerAccount(final SignupRequest signupRequest) {
@@ -98,32 +78,20 @@ public class AuthenticationService {
         userRepository.save(account);
     }
 
-    public void logoutUser(final UUID refreshToken,
-                           final HttpServletResponse response) {
-        jwtService.removeTokenFromCookie(response);
-        refreshTokenRepository.deleteById(refreshToken);
+    public void logoutUser(final HttpServletResponse response) {
+        jwtService.removeAccessTokenFromCookie(response);
+        jwtService.removeRefreshTokenFromCookie(response);
     }
 
-    public AuthenticationResponse refreshToken(
-            final UUID refreshToken,
-            final HttpServletResponse response) {
-        final var refreshTokenEntity = refreshTokenRepository
-                .findByIdAndExpiresAtAfter(refreshToken, Instant.now())
-                .orElseThrow(() ->
-                        new ValidationException("Invalid refresh token"));
-
-        refreshTokenEntity.setExpiresAt(Instant.now());
-        refreshTokenRepository.save(refreshTokenEntity);
-
-        final RefreshToken newRefreshToken = new RefreshToken();
-        newRefreshToken.setUser(refreshTokenEntity.getUser());
-        newRefreshToken.setExpiresAt(Instant.now().plus(EXPIRES_IN));
-        refreshTokenRepository.save(newRefreshToken);
-
-        jwtService.generateToken(
-                refreshTokenEntity.getUser().getEmail(), response);
-        return new AuthenticationResponse(
-                refreshTokenEntity.getUser().getEmail(),
-                newRefreshToken.getId());
+    public String refreshToken(final HttpServletRequest request,
+                               final HttpServletResponse response) {
+        String refreshToken = jwtService.getRefreshTokenFromCookie(request);
+        try {
+            String email = jwtService.renewRefreshToken(refreshToken, response);
+            jwtService.generateAccessToken(email, response);
+            return email;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
     }
 }
