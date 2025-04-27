@@ -1,5 +1,6 @@
 package com.podzilla.auth.controller;
 
+import com.podzilla.auth.dto.AuthenticationResponse;
 import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
 import com.podzilla.auth.service.AuthenticationService;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -35,12 +39,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody final LoginRequest loginRequest,
-                                   final HttpServletResponse response) {
+    public ResponseEntity<?> login(
+            @RequestBody final LoginRequest loginRequest,
+            final HttpServletResponse response) {
         try {
-            String email = authenticationService.login(loginRequest, response);
-            LOGGER.info("User {} logged in", email);
-            return new ResponseEntity<>(email + " signed in", HttpStatus.OK);
+            AuthenticationResponse authResponse =
+                    authenticationService.login(loginRequest, response);
+            LOGGER.info("User {} logged in", authResponse.email());
+            return new ResponseEntity<>(authResponse, HttpStatus.OK);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return new ResponseEntity<>(e.getMessage(),
@@ -64,9 +70,27 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping("/signout")
-    public ResponseEntity<?> logoutUser(final HttpServletResponse response) {
-        authenticationService.logoutUser(response);
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(
+            @RequestParam final UUID refreshToken,
+            final HttpServletResponse response) {
+        authenticationService.logoutUser(refreshToken, response);
         return new ResponseEntity<>("You've been signed out!", HttpStatus.OK);
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(
+            @RequestParam final UUID refreshToken,
+            final HttpServletResponse response) {
+        try {
+            AuthenticationResponse authResponse =
+                    authenticationService.refreshToken(refreshToken, response);
+            LOGGER.info("User {} refreshed token", authResponse.email());
+            return ResponseEntity.ok(authResponse);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(),
+                    HttpStatus.UNAUTHORIZED);
+        }
     }
 }
