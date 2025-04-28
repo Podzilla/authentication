@@ -45,6 +45,8 @@ public class SecurityConfig {
                                         HttpMethod.GET, "public_resource")
                                 .permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/admin/**")
+                                .hasRole("ADMIN")
                                 .anyRequest().authenticated()
 
                 )
