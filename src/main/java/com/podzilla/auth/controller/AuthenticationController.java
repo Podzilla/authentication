@@ -42,7 +42,7 @@ public class AuthenticationController {
             String email = authenticationService.login(loginRequest, response);
             LOGGER.info("User {} logged in", email);
             return new ResponseEntity<>(
-                    "User " + email + "logged in successfully",
+                    "User " + email + " logged in successfully",
                     HttpStatus.OK);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
