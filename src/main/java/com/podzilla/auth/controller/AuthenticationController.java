@@ -51,7 +51,7 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/register")
     public ResponseEntity<?> registerUser(
             @RequestBody final SignupRequest signupRequest,
             final HttpServletRequest request) {

@@ -74,19 +74,25 @@ public class JWTService {
                                      final HttpServletResponse response) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityExistsException("User not found"));
+        RefreshToken userRefreshToken =
+                refreshTokenRepository.findByUserIdAndExpiresAtAfter(
+                        user.getId(), Instant.now()).orElse(null);
 
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setUser(user);
-        refreshToken.setExpiresAt(Instant.now().plus(
-                REFRESH_TOKEN_EXPIRATION_TIME));
-        refreshTokenRepository.save(refreshToken);
+        if (userRefreshToken == null) {
+            userRefreshToken = new RefreshToken();
+            userRefreshToken.setUser(user);
+            userRefreshToken.setCreatedAt(Instant.now());
+            userRefreshToken.setExpiresAt(Instant.now().plus(
+                    REFRESH_TOKEN_EXPIRATION_TIME));
+            refreshTokenRepository.save(userRefreshToken);
+        }
 
-        String refreshTokenString = refreshToken.getId().toString();
+        String refreshTokenString = userRefreshToken.getId().toString();
         addRefreshTokenToCookie(refreshTokenString, response);
     }
 
     public String renewRefreshToken(final String refreshToken,
-                                  final HttpServletResponse response) {
+                                    final HttpServletResponse response) {
         RefreshToken token =
                 refreshTokenRepository
                         .findByIdAndExpiresAtAfter(
@@ -100,6 +106,7 @@ public class JWTService {
 
         RefreshToken newRefreshToken = new RefreshToken();
         newRefreshToken.setUser(token.getUser());
+        newRefreshToken.setCreatedAt(Instant.now());
         newRefreshToken.setExpiresAt(Instant.now().plus(
                 REFRESH_TOKEN_EXPIRATION_TIME));
         refreshTokenRepository.save(newRefreshToken);
