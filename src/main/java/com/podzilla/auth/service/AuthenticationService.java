@@ -2,12 +2,12 @@ package com.podzilla.auth.service;
 
 import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
+import com.podzilla.auth.exception.ValidationException;
 import com.podzilla.auth.model.ERole;
 import com.podzilla.auth.model.Role;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.RoleRepository;
 import com.podzilla.auth.repository.UserRepository;
-import jakarta.persistence.EntityExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -66,7 +66,7 @@ public class AuthenticationService {
 
     public void registerAccount(final SignupRequest signupRequest) {
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            throw new EntityExistsException("Email already used");
+            throw new ValidationException("Email already in use.");
         }
 
         User account = new User(
@@ -92,7 +92,7 @@ public class AuthenticationService {
             tokenService.generateAccessToken(email, response);
             return email;
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid refresh token");
+            throw new ValidationException("Invalid refresh token.");
         }
     }
 }
