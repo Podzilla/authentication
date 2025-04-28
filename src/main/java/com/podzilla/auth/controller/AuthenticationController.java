@@ -82,7 +82,7 @@ public class AuthenticationController {
                     request, response);
             LOGGER.info("User {} refreshed token", email);
             return new ResponseEntity<>(
-                    "User " + email + "refreshed token successfully",
+                    "User " + email + " refreshed token successfully",
                     HttpStatus.OK);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
