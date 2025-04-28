@@ -10,5 +10,5 @@ jobs:
   call-ci:
     uses: Podzilla/templates/.github/workflows/ci.yml@main
     with:
-      branch: 'refs/head/main'  # <<< Passes the branch name dynamically
+      branch: 'refs/heads/main'  # <<< Passes the branch name dynamically
     secrets: inherit
