@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Service
-public class JWTService {
+public class TokenService {
 
     // set in .env
     @Value("${jwt.token.secret}")
@@ -41,12 +41,15 @@ public class JWTService {
             java.time.Duration.ofDays(10);
     private static final Integer REFRESH_TOKEN_COOKIE_EXPIRATION_TIME =
             60 * 60 * 24 * 10;
+    private static final String REFRESH_TOKEN_COOKIE_PATH =
+            "/api/auth/refresh-token";
+    private static final String ACCESS_TOKEN_COOKIE_PATH = "/";
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public JWTService(final UserRepository userRepository,
-                      final RefreshTokenRepository refreshTokenRepository) {
+    public TokenService(final UserRepository userRepository,
+                        final RefreshTokenRepository refreshTokenRepository) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
     }
@@ -64,7 +67,7 @@ public class JWTService {
         Cookie cookie = new Cookie("accessToken", jwt);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
-        cookie.setPath("/");
+        cookie.setPath(ACCESS_TOKEN_COOKIE_PATH);
         cookie.setMaxAge(ACCESS_TOKEN_COOKIE_EXPIRATION_TIME);
         response.addCookie(cookie);
     }
@@ -121,7 +124,7 @@ public class JWTService {
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
-        cookie.setPath("/api/auth/refresh-token");
+        cookie.setPath(REFRESH_TOKEN_COOKIE_PATH);
         cookie.setMaxAge(REFRESH_TOKEN_COOKIE_EXPIRATION_TIME);
         response.addCookie(cookie);
     }
@@ -159,8 +162,8 @@ public class JWTService {
 
     public void removeAccessTokenFromCookie(
             final HttpServletResponse response) {
-        Cookie cookie = new Cookie("JWT", null);
-        cookie.setPath("/");
+        Cookie cookie = new Cookie("accessToken", null);
+        cookie.setPath(ACCESS_TOKEN_COOKIE_PATH);
 
         response.addCookie(cookie);
     }
@@ -168,7 +171,7 @@ public class JWTService {
     public void removeRefreshTokenFromCookie(
             final HttpServletResponse response) {
         Cookie cookie = new Cookie("refreshToken", null);
-        cookie.setPath("/api/auth/refresh-token");
+        cookie.setPath(REFRESH_TOKEN_COOKIE_PATH);
 
         response.addCookie(cookie);
     }
