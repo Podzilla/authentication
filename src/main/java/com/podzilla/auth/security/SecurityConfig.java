@@ -36,7 +36,8 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((auth) ->
                         auth
-                                .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/auth/login").permitAll()
+                                .requestMatchers("/auth/register").permitAll()
                                 .requestMatchers("/admin/**")
                                 .hasRole("ADMIN")
                                 .requestMatchers("/swagger-ui/**",
