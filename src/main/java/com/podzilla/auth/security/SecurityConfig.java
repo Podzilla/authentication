@@ -36,12 +36,17 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((auth) ->
                         auth
-                                .requestMatchers("/auth/login").permitAll()
-                                .requestMatchers("/auth/register").permitAll()
+                                .requestMatchers("/auth/login")
+                                .permitAll()
+                                .requestMatchers("/auth/register")
+                                .permitAll()
+                                .requestMatchers("/auth/refresh-token")
+                                .permitAll()
                                 .requestMatchers("/admin/**")
                                 .hasRole("ADMIN")
                                 .requestMatchers("/swagger-ui/**",
-                                        "/v3/api-docs/**").permitAll()
+                                        "/v3/api-docs/**")
+                                .permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(s -> s
