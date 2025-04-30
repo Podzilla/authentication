@@ -3,6 +3,7 @@ package com.podzilla.auth.service;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
+    @Cacheable(value = "userDetails", key = "#email")
     public UserDetails loadUserByUsername(final String email)
             throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
