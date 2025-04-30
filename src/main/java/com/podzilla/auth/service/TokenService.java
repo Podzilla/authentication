@@ -81,11 +81,12 @@ public class TokenService {
                         user.getId(), Instant.now()).orElse(null);
 
         if (userRefreshToken == null) {
-            userRefreshToken = new RefreshToken();
-            userRefreshToken.setUser(user);
-            userRefreshToken.setCreatedAt(Instant.now());
-            userRefreshToken.setExpiresAt(Instant.now().plus(
-                    REFRESH_TOKEN_EXPIRATION_TIME));
+            userRefreshToken =
+                    RefreshToken.builder()
+                            .user(user)
+                            .createdAt(Instant.now())
+                            .expiresAt(Instant.now().plus(
+                                    REFRESH_TOKEN_EXPIRATION_TIME)).build();
             refreshTokenRepository.save(userRefreshToken);
         }
 
@@ -106,11 +107,12 @@ public class TokenService {
         token.setExpiresAt(Instant.now());
         refreshTokenRepository.save(token);
 
-        RefreshToken newRefreshToken = new RefreshToken();
-        newRefreshToken.setUser(token.getUser());
-        newRefreshToken.setCreatedAt(Instant.now());
-        newRefreshToken.setExpiresAt(Instant.now().plus(
-                REFRESH_TOKEN_EXPIRATION_TIME));
+        RefreshToken newRefreshToken =
+                RefreshToken.builder()
+                        .user(token.getUser())
+                        .createdAt(Instant.now())
+                        .expiresAt(Instant.now().plus(
+                                REFRESH_TOKEN_EXPIRATION_TIME)).build();
         refreshTokenRepository.save(newRefreshToken);
 
         String newRefreshTokenString = newRefreshToken.getId().toString();
@@ -168,12 +170,29 @@ public class TokenService {
         response.addCookie(cookie);
     }
 
-    public void removeRefreshTokenFromCookie(
+    public void removeRefreshTokenFromCookieAndExpire(
             final HttpServletResponse response) {
+        String userEmail = extractEmail();
+        User user =
+                userRepository.findByEmail(userEmail)
+                        .orElseThrow(() -> new ValidationException(
+                                "User not found"));
+        RefreshToken refreshToken =
+                refreshTokenRepository.findByUserIdAndExpiresAtAfter(
+                        user.getId(), Instant.now()).orElseThrow(
+                        () -> new ValidationException(
+                                "Refresh token not found"));
+        expireRefreshToken(refreshToken);
+
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setPath(REFRESH_TOKEN_COOKIE_PATH);
 
         response.addCookie(cookie);
+    }
+
+    private void expireRefreshToken(final RefreshToken token) {
+        token.setExpiresAt(Instant.now());
+        refreshTokenRepository.save(token);
     }
 
     private SecretKey getSignInKey() {

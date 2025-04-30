@@ -69,18 +69,23 @@ public class AuthenticationService {
             throw new ValidationException("Email already in use.");
         }
 
-        User account = new User(
-                signupRequest.getName(),
-                signupRequest.getEmail(),
-                passwordEncoder.encode(signupRequest.getPassword()));
+        User account =
+                User.builder()
+                        .name(signupRequest.getName())
+                        .email(signupRequest.getEmail())
+                        .password(
+                                passwordEncoder.encode(
+                                        signupRequest.getPassword()))
+                        .build();
         Role role = roleRepository.findByErole(ERole.ROLE_USER).orElse(null);
         account.setRoles(Collections.singleton(role));
         userRepository.save(account);
     }
 
-    public void logoutUser(final HttpServletResponse response) {
+    public void logoutUser(
+            final HttpServletResponse response) {
         tokenService.removeAccessTokenFromCookie(response);
-        tokenService.removeRefreshTokenFromCookie(response);
+        tokenService.removeRefreshTokenFromCookieAndExpire(response);
     }
 
     public String refreshToken(final HttpServletRequest request,
