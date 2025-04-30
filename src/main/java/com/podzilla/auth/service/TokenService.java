@@ -1,5 +1,6 @@
 package com.podzilla.auth.service;
 
+import com.podzilla.auth.exception.ValidationException;
 import com.podzilla.auth.model.RefreshToken;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.RefreshTokenRepository;
@@ -9,11 +10,9 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.persistence.EntityExistsException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.WebUtils;
@@ -76,7 +75,7 @@ public class TokenService {
     public void generateRefreshToken(final String email,
                                      final HttpServletResponse response) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityExistsException("User not found"));
+                .orElseThrow(() -> new ValidationException("User not found"));
         RefreshToken userRefreshToken =
                 refreshTokenRepository.findByUserIdAndExpiresAtAfter(
                         user.getId(), Instant.now()).orElse(null);
@@ -147,7 +146,7 @@ public class TokenService {
         return null;
     }
 
-    public void validateAccessToken(final String token) throws JwtException {
+    public void validateAccessToken(final String token) {
         try {
             claims = Jwts.parser()
                     .verifyWith(getSignInKey())
@@ -157,7 +156,7 @@ public class TokenService {
 
 
         } catch (JwtException e) {
-            throw new JwtException(e.getMessage());
+            throw new ValidationException(e.getMessage());
         }
     }
 
