@@ -2,7 +2,6 @@ package com.podzilla.auth.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -35,22 +34,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exceptionHandling ->
-                        exceptionHandling
-                                .authenticationEntryPoint(
-                                        new RestAuthenticationEntryPoint())
-                )
                 .authorizeHttpRequests((auth) ->
-                        auth.requestMatchers(
-                                        HttpMethod.GET, "public_resource")
-                                .permitAll()
+                        auth
                                 .requestMatchers("/auth/**").permitAll()
                                 .requestMatchers("/admin/**")
                                 .hasRole("ADMIN")
                                 .requestMatchers("/swagger-ui/**",
                                         "/v3/api-docs/**").permitAll()
                                 .anyRequest().authenticated()
-
                 )
                 .sessionManagement(s -> s
                         .sessionCreationPolicy(
