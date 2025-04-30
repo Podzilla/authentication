@@ -27,19 +27,19 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final JWTService jwtService;
+    private final TokenService tokenService;
     private final RoleRepository roleRepository;
 
     public AuthenticationService(
             final AuthenticationManager authenticationManager,
             final PasswordEncoder passwordEncoder,
             final UserRepository userRepository,
-            final JWTService jwtService,
+            final TokenService tokenService,
             final RoleRepository roleRepository) {
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
-        this.jwtService = jwtService;
+        this.tokenService = tokenService;
         this.roleRepository = roleRepository;
     }
 
@@ -56,8 +56,8 @@ public class AuthenticationService {
 
         SecurityContextHolder.getContext().
                 setAuthentication(authenticationResponse);
-        jwtService.generateAccessToken(loginRequest.getEmail(), response);
-        jwtService.generateRefreshToken(loginRequest.getEmail(), response);
+        tokenService.generateAccessToken(loginRequest.getEmail(), response);
+        tokenService.generateRefreshToken(loginRequest.getEmail(), response);
         UserDetails userDetails =
                 (UserDetails) authenticationResponse.getPrincipal();
 
@@ -79,16 +79,17 @@ public class AuthenticationService {
     }
 
     public void logoutUser(final HttpServletResponse response) {
-        jwtService.removeAccessTokenFromCookie(response);
-        jwtService.removeRefreshTokenFromCookie(response);
+        tokenService.removeAccessTokenFromCookie(response);
+        tokenService.removeRefreshTokenFromCookie(response);
     }
 
     public String refreshToken(final HttpServletRequest request,
                                final HttpServletResponse response) {
-        String refreshToken = jwtService.getRefreshTokenFromCookie(request);
+        String refreshToken = tokenService.getRefreshTokenFromCookie(request);
         try {
-            String email = jwtService.renewRefreshToken(refreshToken, response);
-            jwtService.generateAccessToken(email, response);
+            String email =
+                    tokenService.renewRefreshToken(refreshToken, response);
+            tokenService.generateAccessToken(email, response);
             return email;
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid refresh token");
