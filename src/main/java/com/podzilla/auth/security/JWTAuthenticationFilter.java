@@ -62,7 +62,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             context.setAuthentication(authToken);
             SecurityContextHolder.setContext(context);
 
-
+            LOGGER.info("User {} authenticated", userEmail);
         } catch (Exception e) {
             LOGGER.error("Invalid JWT token: {}", e.getMessage());
         }
