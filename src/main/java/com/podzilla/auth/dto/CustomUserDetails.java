@@ -1,6 +1,7 @@
 package com.podzilla.auth.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -12,6 +13,8 @@ public class CustomUserDetails implements UserDetails {
 
     private String username;
     private String password;
+
+    @JsonDeserialize(contentAs = CustomGrantedAuthority.class)
     private Set<GrantedAuthority> authorities;
 
     public CustomUserDetails() {

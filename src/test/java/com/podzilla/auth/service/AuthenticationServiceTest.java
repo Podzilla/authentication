@@ -1,5 +1,6 @@
 package com.podzilla.auth.service;
 
+import com.podzilla.auth.dto.CustomGrantedAuthority;
 import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
 import com.podzilla.auth.exception.ValidationException;
@@ -21,7 +22,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -175,7 +175,7 @@ class AuthenticationServiceTest {
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 loginRequest.getEmail(),
                 "encodedPassword", // Password doesn't matter much here as AuthenticationManager handles it
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                Collections.singletonList(new CustomGrantedAuthority("ROLE_USER"))
         );
         Authentication successfulAuth = new UsernamePasswordAuthenticationToken(
                 userDetails, // Principal

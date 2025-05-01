@@ -43,7 +43,7 @@ public class SecurityConfig {
                                 .requestMatchers("/auth/refresh-token")
                                 .permitAll()
                                 .requestMatchers("/admin/**")
-                                .hasRole("ADMIN")
+                                .hasAuthority("ROLE_ADMIN")
                                 .requestMatchers("/swagger-ui/**",
                                         "/v3/api-docs/**")
                                 .permitAll()
