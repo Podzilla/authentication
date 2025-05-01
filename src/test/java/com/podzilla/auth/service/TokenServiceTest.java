@@ -148,7 +148,7 @@ class TokenServiceTest {
                 .id(testRefreshTokenId)
                 .user(user)
                 .createdAt(Instant.now().minus(1, ChronoUnit.DAYS))
-                .expiresAt(Instant.now().plus(50, ChronoUnit.DAYS)) // Still
+                .expiresAt(Instant.now().plus(51, ChronoUnit.DAYS)) // Still
                 // valid
                 .build();
 
