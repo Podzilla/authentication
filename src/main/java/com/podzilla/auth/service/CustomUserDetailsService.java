@@ -1,5 +1,6 @@
 package com.podzilla.auth.service;
 
+import com.podzilla.auth.exception.NotFoundException;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -24,11 +24,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(final String email)
-            throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(final String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException(
+                        new NotFoundException(
                                 email + " not found."));
 
         Set<GrantedAuthority> authorities = user
