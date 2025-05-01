@@ -65,8 +65,19 @@ public class AuthenticationService {
     }
 
     public void registerAccount(final SignupRequest signupRequest) {
-        if (signupRequest.getPassword().isEmpty()) {
+        if (signupRequest.getPassword() == null
+                || signupRequest.getPassword().isEmpty()) {
             throw new ValidationException("Password cannot be empty.");
+        }
+
+        if (signupRequest.getName() == null
+                || signupRequest.getName().isEmpty()) {
+            throw new ValidationException("Name cannot be empty.");
+        }
+
+        if (signupRequest.getEmail() == null
+                || signupRequest.getEmail().isEmpty()) {
+            throw new ValidationException("Email cannot be empty.");
         }
 
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
@@ -82,7 +93,7 @@ public class AuthenticationService {
                                         signupRequest.getPassword()))
                         .build();
         Role role = roleRepository.findByErole(ERole.ROLE_USER).orElse(null);
-        account.setRoles(Collections.singleton(role));
+        account.setRoles(role != null ? Collections.singleton(role) : null);
         userRepository.save(account);
     }
 

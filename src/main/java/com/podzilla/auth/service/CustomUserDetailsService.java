@@ -2,6 +2,7 @@ package com.podzilla.auth.service;
 
 import com.podzilla.auth.dto.CustomUserDetails;
 import com.podzilla.auth.exception.NotFoundException;
+import com.podzilla.auth.exception.ValidationException;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() ->
                         new NotFoundException(
                                 email + " not found."));
+
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            throw new ValidationException("User has no roles assigned.");
+        }
 
         Set<GrantedAuthority> authorities = user
                 .getRoles()
