@@ -1,6 +1,9 @@
 package com.podzilla.auth.redis;
 
 import com.podzilla.auth.dto.CustomUserDetails;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -17,8 +20,12 @@ public class RedisCacheConfig {
     private static final int CACHE_TTL = 60 * 60;
 
     @Bean
-    public RedisCacheManager cacheManager(
-            final RedisConnectionFactory redisConnectionFactory) {
+    public CacheManager cacheManager(
+            final RedisConnectionFactory redisConnectionFactory,
+            @Value("${appconfig.cache.enabled}") final String cacheEnabled) {
+        if (!Boolean.parseBoolean(cacheEnabled)) {
+            return new NoOpCacheManager();
+        }
 
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration
                 .defaultCacheConfig()
