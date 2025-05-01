@@ -93,7 +93,12 @@ public class AuthenticationService {
                                         signupRequest.getPassword()))
                         .build();
         Role role = roleRepository.findByErole(ERole.ROLE_USER).orElse(null);
-        account.setRoles(role != null ? Collections.singleton(role) : null);
+
+        if (role == null) {
+            throw new ValidationException("Role_USER not found.");
+        }
+
+        account.setRoles(Collections.singleton(role));
         userRepository.save(account);
     }
 

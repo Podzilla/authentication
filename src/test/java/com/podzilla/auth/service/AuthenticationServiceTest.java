@@ -151,25 +151,19 @@ class AuthenticationServiceTest {
         when(userRepository.existsByEmail(signupRequest.getEmail())).thenReturn(false);
         when(passwordEncoder.encode(signupRequest.getPassword())).thenReturn("encodedPassword");
         when(roleRepository.findByErole(ERole.ROLE_USER)).thenReturn(Optional.empty()); // Role not found
-        when(userRepository.save(any(User.class))).thenReturn(user);
 
         // Act
-        authenticationService.registerAccount(signupRequest);
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
+            authenticationService.registerAccount(signupRequest);
+        });
+
+        assertEquals("Validation error: Role_USER not found.",
+                exception.getMessage());
 
         // Assert
         verify(userRepository).existsByEmail(signupRequest.getEmail());
         verify(passwordEncoder).encode(signupRequest.getPassword());
         verify(roleRepository).findByErole(ERole.ROLE_USER);
-
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(userCaptor.capture());
-        User savedUser = userCaptor.getValue();
-
-        // Check that roles are empty or null as expected when role isn't found
-        assertTrue(savedUser.getRoles() == null || savedUser.getRoles().isEmpty());
-        assertEquals(signupRequest.getName(), savedUser.getName());
-        assertEquals(signupRequest.getEmail(), savedUser.getEmail());
-        assertEquals("encodedPassword", savedUser.getPassword());
     }
 
 
