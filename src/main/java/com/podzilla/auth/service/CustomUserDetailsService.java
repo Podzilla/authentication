@@ -1,5 +1,6 @@
 package com.podzilla.auth.service;
 
+import com.podzilla.auth.dto.CustomUserDetails;
 import com.podzilla.auth.exception.NotFoundException;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.UserRepository;
@@ -39,7 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                         role.getErole().name()))
                 .collect(Collectors.toSet());
 
-        return new org.springframework.security.core.userdetails.User(
+        return new CustomUserDetails(
                 user.getEmail(),
                 user.getPassword(),
                 authorities
