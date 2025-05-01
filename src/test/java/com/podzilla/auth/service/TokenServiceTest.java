@@ -394,7 +394,7 @@ class TokenServiceTest {
                 .id(testRefreshTokenId)
                 .user(user)
                 .createdAt(Instant.now().minus(7, ChronoUnit.DAYS))
-                .expiresAt(Instant.now().plus(60, ChronoUnit.DAYS))
+                .expiresAt(Instant.now().plus(21, ChronoUnit.DAYS))
                 .build();
 
         when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(user));
