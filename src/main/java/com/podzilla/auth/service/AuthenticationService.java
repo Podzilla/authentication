@@ -46,9 +46,6 @@ public class AuthenticationService {
     public String login(final LoginRequest loginRequest,
                         final HttpServletResponse response) {
 
-        System.out.println("Login request: " + loginRequest.getEmail()
-                + " " + loginRequest.getPassword());
-
         Authentication authenticationRequest =
                 UsernamePasswordAuthenticationToken.
                         unauthenticated(
