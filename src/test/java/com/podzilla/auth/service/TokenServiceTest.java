@@ -148,7 +148,8 @@ class TokenServiceTest {
                 .id(testRefreshTokenId)
                 .user(user)
                 .createdAt(Instant.now().minus(1, ChronoUnit.DAYS))
-                .expiresAt(Instant.now().plus(5, ChronoUnit.DAYS)) // Still valid
+                .expiresAt(Instant.now().plus(50, ChronoUnit.DAYS)) // Still
+                // valid
                 .build();
 
         when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(user));
@@ -199,7 +200,7 @@ class TokenServiceTest {
         RefreshToken oldToken = RefreshToken.builder()
                 .id(testRefreshTokenId)
                 .user(user)
-                .createdAt(Instant.now().minus(1, ChronoUnit.DAYS))
+                .createdAt(Instant.now().minus(10, ChronoUnit.DAYS))
                 .expiresAt(Instant.now().plus(5, ChronoUnit.DAYS))
                 .build();
         String oldTokenString = oldToken.getId().toString();
@@ -392,8 +393,8 @@ class TokenServiceTest {
         RefreshToken refreshToken = RefreshToken.builder()
                 .id(testRefreshTokenId)
                 .user(user)
-                .createdAt(Instant.now().minus(1, ChronoUnit.DAYS))
-                .expiresAt(Instant.now().plus(5, ChronoUnit.DAYS))
+                .createdAt(Instant.now().minus(7, ChronoUnit.DAYS))
+                .expiresAt(Instant.now().plus(60, ChronoUnit.DAYS))
                 .build();
 
         when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(user));
