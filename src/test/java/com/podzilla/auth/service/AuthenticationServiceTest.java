@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -263,7 +264,7 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void refreshToken_shouldThrowValidationException_whenTokenIsInvalid() {
+    void refreshToken_shouldThrowAccessDeniedException_whenTokenIsInvalid() {
         // Arrange
         String invalidRefreshToken = "invalid-refresh-token";
 
@@ -273,11 +274,11 @@ class AuthenticationServiceTest {
                 .thenThrow(new IllegalArgumentException("Token invalid"));
 
         // Act & Assert
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
             authenticationService.refreshToken(httpServletRequest, httpServletResponse);
         });
 
-        assertEquals("Validation error: Invalid refresh token.",
+        assertEquals("Invalid refresh token.",
                 exception.getMessage());
         verify(tokenService).getRefreshTokenFromCookie(httpServletRequest);
         verify(tokenService).renewRefreshToken(invalidRefreshToken, httpServletResponse);

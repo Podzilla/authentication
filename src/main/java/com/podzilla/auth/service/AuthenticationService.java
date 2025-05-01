@@ -10,6 +10,7 @@ import com.podzilla.auth.repository.RoleRepository;
 import com.podzilla.auth.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -110,14 +111,18 @@ public class AuthenticationService {
 
     public String refreshToken(final HttpServletRequest request,
                                final HttpServletResponse response) {
-        String refreshToken = tokenService.getRefreshTokenFromCookie(request);
         try {
+            String refreshToken =
+                    tokenService.getRefreshTokenFromCookie(request);
+            if (refreshToken == null) {
+                throw new AccessDeniedException("Refresh token not found.");
+            }
             String email =
                     tokenService.renewRefreshToken(refreshToken, response);
             tokenService.generateAccessToken(email, response);
             return email;
         } catch (IllegalArgumentException e) {
-            throw new ValidationException("Invalid refresh token.");
+            throw new AccessDeniedException("Invalid refresh token.");
         }
     }
 }

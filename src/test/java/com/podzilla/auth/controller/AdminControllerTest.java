@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.podzilla.auth.model.ERole;
 import com.podzilla.auth.model.Role;
 import com.podzilla.auth.model.User;
+import com.podzilla.auth.repository.RoleRepository;
 import com.podzilla.auth.repository.UserRepository;
 import io.jsonwebtoken.lang.Collections;
 import org.junit.jupiter.api.AfterEach;
@@ -15,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
@@ -28,9 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Sql(statements = {
-        "INSERT INTO roles (id, erole) VALUES (1, 'ROLE_USER'), (2, 'ROLE_ADMIN')",
-}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 class AdminControllerTest {
 
     @Autowired
@@ -38,6 +35,9 @@ class AdminControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -51,14 +51,15 @@ class AdminControllerTest {
     @BeforeEach
     void setUp() {
         userRepository.deleteAll(); // Clean slate before each test
+        roleRepository.deleteAll();
 
         Role adminRole = new Role();
-        adminRole.setId(2L);
         adminRole.setErole(ERole.ROLE_ADMIN);
+        roleRepository.save(adminRole);
 
         Role userRole = new Role();
-        userRole.setId(1L);
         userRole.setErole(ERole.ROLE_USER);
+        roleRepository.save(userRole);
 
         user1 = new User();
         user1.setEmail("adminUser");
@@ -78,6 +79,7 @@ class AdminControllerTest {
     @AfterEach
     void tearDown() {
         userRepository.deleteAll(); // Clean up after each test
+        roleRepository.deleteAll();
     }
 
     @Test
