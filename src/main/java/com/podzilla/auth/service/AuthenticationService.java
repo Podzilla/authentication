@@ -46,6 +46,9 @@ public class AuthenticationService {
     public String login(final LoginRequest loginRequest,
                         final HttpServletResponse response) {
 
+        System.out.println("Login request: " + loginRequest.getEmail()
+                + " " + loginRequest.getPassword());
+
         Authentication authenticationRequest =
                 UsernamePasswordAuthenticationToken.
                         unauthenticated(
@@ -65,6 +68,10 @@ public class AuthenticationService {
     }
 
     public void registerAccount(final SignupRequest signupRequest) {
+        if (signupRequest.getPassword().isEmpty()) {
+            throw new ValidationException("Password cannot be empty.");
+        }
+
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new ValidationException("Email already in use.");
         }
