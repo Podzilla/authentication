@@ -46,4 +46,18 @@ public class AdminController {
         logger.debug("Admin requested to update activation status for userId={} to isActive={}", userId, isActive);
         adminService.updateUserActivation(userId, isActive);
     }
+
+
+    @DeleteMapping("/users/{userId}")
+    @Operation(summary = "Delete a user",
+            description = "Allows an admin to delete a specific user account.")
+    @ApiResponse(responseCode = "200",
+            description = "User deleted successfully")
+    public void deleteUser(
+            @Parameter(description = "ID of the user to delete")
+            @PathVariable final Long userId) {
+
+        logger.debug("Admin requested to delete user with userId={}", userId);
+        adminService.deleteUser(userId);
+    }
 }

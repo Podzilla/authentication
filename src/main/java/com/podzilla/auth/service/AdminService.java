@@ -16,9 +16,11 @@ public class AdminService {
     private static final Logger logger = LoggerFactory.getLogger(AdminService.class);
 
     private final UserRepository userRepository;
+    private final UserService userService;
 
-    public AdminService(final UserRepository userRepository) {
+    public AdminService(final UserRepository userRepository, final UserService userService) {
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public List<User> getUsers() {
@@ -27,16 +29,19 @@ public class AdminService {
 
     @Transactional
     public void updateUserActivation(final Long userId, final boolean isActive) {
-        logger.debug("Fetching user with id={}", userId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    logger.warn("User not found with id={}", userId);
-                    return new NotFoundException("User with id " + userId + " does not exist.");
-                });
-
+        User user = userService.getUserOrThrow(userId);
         logger.debug("Updating isActive status for userId={} from {} to {}", userId, user.getIsActive(), isActive);
         user.setIsActive(isActive);
         userRepository.save(user);
         logger.debug("User activation status updated successfully for userId={}", userId);
+    }
+
+
+    @Transactional
+    public void deleteUser(final Long userId) {
+        User user = userService.getUserOrThrow(userId);
+        logger.debug("Deleting user with userId={}", userId);
+        userRepository.delete(user);
+        logger.debug("User deleted successfully with userId={}", userId);
     }
 }
