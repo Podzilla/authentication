@@ -7,8 +7,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 @RestController
@@ -16,7 +21,8 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
-    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(AdminController.class);
 
     public AdminController(final AdminService adminService) {
         this.adminService = adminService;
@@ -33,17 +39,21 @@ public class AdminController {
 
     @PatchMapping("/users/{userId}/activate")
     @Operation(summary = "Activate or deactivate a user",
-            description = "Allows an admin to activate or deactivate a specific user.")
+            description = "Allows an admin to activate"
+                    + " or deactivate a specific user.")
     @ApiResponse(responseCode = "200",
             description = "User activation status updated successfully")
     public void updateUserActivation(
             @Parameter(description = "ID of the user to activate/deactivate")
-            @PathVariable Long userId,
+            @PathVariable final Long userId,
 
-            @Parameter(description = "Set to true to activate, false to deactivate the user")
-            @RequestParam boolean isActive) {
+            @Parameter(description = "Set to true to activate,"
+                    + " false to deactivate the user")
+            @RequestParam final boolean isActive) {
 
-        logger.debug("Admin requested to update activation status for userId={} to isActive={}", userId, isActive);
+        LOGGER.debug("Admin requested to update activation status for "
+                + "userId={}"
+                + " to isActive={}", userId, isActive);
         adminService.updateUserActivation(userId, isActive);
     }
 
@@ -57,7 +67,7 @@ public class AdminController {
             @Parameter(description = "ID of the user to delete")
             @PathVariable final Long userId) {
 
-        logger.debug("Admin requested to delete user with userId={}", userId);
+        LOGGER.debug("Admin requested to delete user with userId={}", userId);
         adminService.deleteUser(userId);
     }
 }

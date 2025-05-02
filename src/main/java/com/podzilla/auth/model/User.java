@@ -56,7 +56,7 @@ public class User {
     private Set<RefreshToken> refreshTokens = new HashSet<>();
 
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private Boolean isActive = true;
+    private Boolean enabled = true;
 
 
     public User(final String name, final String email,
@@ -64,6 +64,6 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.isActive = true;
+        this.enabled = true;
     }
 }

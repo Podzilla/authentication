@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
 
@@ -23,19 +24,20 @@ public class UserService {
     @Transactional
     public void updateUserProfile(final Long userId, final String name) {
         User user = getUserOrThrow(userId);
-        logger.debug("Updating name for userId={}", userId);
+        LOGGER.debug("Updating name for userId={}", userId);
         user.setName(name);
         userRepository.save(user);
-        logger.debug("User profile updated successfully for userId={}", userId);
+        LOGGER.debug("User profile updated successfully for userId={}", userId);
     }
 
 
     public User getUserOrThrow(final Long userId) {
-        logger.debug("Fetching user with id={}", userId);
+        LOGGER.debug("Fetching user with id={}", userId);
         return userRepository.findById(userId)
                 .orElseThrow(() -> {
-                    logger.warn("User not found with id={}", userId);
-                    return new NotFoundException("User with id " + userId + " does not exist.");
+                    LOGGER.warn("User not found with id={}", userId);
+                    return new NotFoundException("User with id "
+                            + userId + " does not exist.");
                 });
     }
 }
