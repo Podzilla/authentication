@@ -47,7 +47,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             String userEmail = tokenService.extractEmail();
 
             UserDetails userDetails =
-                    customUserDetailsService.loadUserByUsername(userEmail);
+                    customUserDetailsService
+                            .loadUserByUsernameCached(userEmail);
 
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(

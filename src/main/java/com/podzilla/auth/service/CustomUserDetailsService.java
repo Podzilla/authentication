@@ -27,7 +27,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    @Cacheable(value = "userDetails", key = "#email")
     public UserDetails loadUserByUsername(final String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
@@ -50,5 +49,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getPassword(),
                 authorities
         );
+    }
+
+    @Cacheable(value = "userDetails", key = "#email")
+    public UserDetails loadUserByUsernameCached(final String email) {
+        return loadUserByUsername(email);
     }
 }

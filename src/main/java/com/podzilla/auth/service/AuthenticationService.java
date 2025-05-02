@@ -2,6 +2,7 @@ package com.podzilla.auth.service;
 
 import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
+import com.podzilla.auth.exception.InvalidActionException;
 import com.podzilla.auth.exception.ValidationException;
 import com.podzilla.auth.model.ERole;
 import com.podzilla.auth.model.Role;
@@ -46,6 +47,11 @@ public class AuthenticationService {
 
     public String login(final LoginRequest loginRequest,
                         final HttpServletResponse response) {
+
+        if (SecurityContextHolder.getContext().getAuthentication()
+                instanceof UsernamePasswordAuthenticationToken) {
+            throw new InvalidActionException("User already logged in.");
+        }
 
         Authentication authenticationRequest =
                 UsernamePasswordAuthenticationToken.
