@@ -55,10 +55,15 @@ public class User {
             orphanRemoval = true)
     private Set<RefreshToken> refreshTokens = new HashSet<>();
 
+    @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private Boolean isActive = true;
+
+
     public User(final String name, final String email,
                 final String password) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.isActive = true;
     }
 }
