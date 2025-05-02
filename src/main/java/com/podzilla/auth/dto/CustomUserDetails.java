@@ -88,8 +88,9 @@ public class CustomUserDetails implements UserDetails {
     }
 
     public boolean equals(final Object obj) {
-        if (obj instanceof CustomUserDetails user) {
-            return this.username.equals(user.getUsername());
+        if (obj instanceof CustomUserDetails) {
+            return this.username
+                    .equals(((CustomUserDetails) obj).getUsername());
         } else {
             return false;
         }
