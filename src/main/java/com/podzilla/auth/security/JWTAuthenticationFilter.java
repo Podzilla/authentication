@@ -47,7 +47,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             String userEmail = tokenService.extractEmail();
 
             UserDetails userDetails =
-                    customUserDetailsService.loadUserByUsername(userEmail);
+                    customUserDetailsService
+                            .loadUserByUsernameCached(userEmail);
 
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
@@ -62,7 +63,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             context.setAuthentication(authToken);
             SecurityContextHolder.setContext(context);
 
-
+            LOGGER.info("User {} authenticated", userEmail);
         } catch (Exception e) {
             LOGGER.error("Invalid JWT token: {}", e.getMessage());
         }

@@ -1,6 +1,7 @@
 services:
   backend:
     image: openjdk:25-ea-4-jdk-oraclelinux9
+    container_name: auth
     ports:
       - "8080:8080"
     env_file:
@@ -9,13 +10,15 @@ services:
       - auth_db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://auth_db:5432/authDB
+      - SPRING_DATA_REDIS_HOST=redis_cache
     volumes:
       - ./target:/app
       - ./logs:/logs
     command: [ "java", "-jar", "/app/auth-0.0.1-SNAPSHOT.jar" ]
 
   auth_db:
-    image: postgres:latest
+    image: postgres:14.17
+    container_name: auth_db
     environment:
       POSTGRES_PASSWORD: 1234
       POSTGRES_USER: postgres
@@ -24,13 +27,15 @@ services:
       - "5432:5432"
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.5.0
+    container_name: loki
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
 
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:3.5.0
+    container_name: promtail
     volumes:
       - ./promtail-config.yml:/etc/promtail/promtail-config.yaml
       - ./logs:/logs
@@ -39,8 +44,23 @@ services:
       - loki
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.6.1
+    container_name: grafana
     ports:
       - "3000:3000"
     depends_on:
       - loki
+
+
+  redis_cache:
+    image: redis:7.4.3
+    container_name: redisCache
+    ports:
+      - "6379:6379"
+
+  redisinsight:
+    image: redis/redisinsight:2.68
+    container_name: redisInsight
+    ports:
+      - "5540:5540"
+    restart: always

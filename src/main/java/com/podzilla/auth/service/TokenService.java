@@ -1,5 +1,6 @@
 package com.podzilla.auth.service;
 
+import com.podzilla.auth.exception.ValidationException;
 import com.podzilla.auth.model.RefreshToken;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.RefreshTokenRepository;
@@ -9,11 +10,9 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.persistence.EntityExistsException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.WebUtils;
@@ -76,17 +75,18 @@ public class TokenService {
     public void generateRefreshToken(final String email,
                                      final HttpServletResponse response) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityExistsException("User not found"));
+                .orElseThrow(() -> new ValidationException("User not found"));
         RefreshToken userRefreshToken =
                 refreshTokenRepository.findByUserIdAndExpiresAtAfter(
                         user.getId(), Instant.now()).orElse(null);
 
         if (userRefreshToken == null) {
-            userRefreshToken = new RefreshToken();
-            userRefreshToken.setUser(user);
-            userRefreshToken.setCreatedAt(Instant.now());
-            userRefreshToken.setExpiresAt(Instant.now().plus(
-                    REFRESH_TOKEN_EXPIRATION_TIME));
+            userRefreshToken =
+                    RefreshToken.builder()
+                            .user(user)
+                            .createdAt(Instant.now())
+                            .expiresAt(Instant.now().plus(
+                                    REFRESH_TOKEN_EXPIRATION_TIME)).build();
             refreshTokenRepository.save(userRefreshToken);
         }
 
@@ -107,11 +107,12 @@ public class TokenService {
         token.setExpiresAt(Instant.now());
         refreshTokenRepository.save(token);
 
-        RefreshToken newRefreshToken = new RefreshToken();
-        newRefreshToken.setUser(token.getUser());
-        newRefreshToken.setCreatedAt(Instant.now());
-        newRefreshToken.setExpiresAt(Instant.now().plus(
-                REFRESH_TOKEN_EXPIRATION_TIME));
+        RefreshToken newRefreshToken =
+                RefreshToken.builder()
+                        .user(token.getUser())
+                        .createdAt(Instant.now())
+                        .expiresAt(Instant.now().plus(
+                                REFRESH_TOKEN_EXPIRATION_TIME)).build();
         refreshTokenRepository.save(newRefreshToken);
 
         String newRefreshTokenString = newRefreshToken.getId().toString();
@@ -147,7 +148,7 @@ public class TokenService {
         return null;
     }
 
-    public void validateAccessToken(final String token) throws JwtException {
+    public void validateAccessToken(final String token) {
         try {
             claims = Jwts.parser()
                     .verifyWith(getSignInKey())
@@ -157,7 +158,7 @@ public class TokenService {
 
 
         } catch (JwtException e) {
-            throw new JwtException(e.getMessage());
+            throw new ValidationException(e.getMessage());
         }
     }
 
@@ -169,12 +170,29 @@ public class TokenService {
         response.addCookie(cookie);
     }
 
-    public void removeRefreshTokenFromCookie(
+    public void removeRefreshTokenFromCookieAndExpire(
             final HttpServletResponse response) {
+        String userEmail = extractEmail();
+        User user =
+                userRepository.findByEmail(userEmail)
+                        .orElseThrow(() -> new ValidationException(
+                                "User not found"));
+        RefreshToken refreshToken =
+                refreshTokenRepository.findByUserIdAndExpiresAtAfter(
+                        user.getId(), Instant.now()).orElseThrow(
+                        () -> new ValidationException(
+                                "Refresh token not found"));
+        expireRefreshToken(refreshToken);
+
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setPath(REFRESH_TOKEN_COOKIE_PATH);
 
         response.addCookie(cookie);
+    }
+
+    private void expireRefreshToken(final RefreshToken token) {
+        token.setExpiresAt(Instant.now());
+        refreshTokenRepository.save(token);
     }
 
     private SecretKey getSignInKey() {
