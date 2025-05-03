@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private Long id;
 
     @NotBlank(message = "Name is required")
@@ -45,16 +45,19 @@ public class User {
     @NotBlank(message = "Password is required")
     private String password;
 
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
             orphanRemoval = true)
     private Set<RefreshToken> refreshTokens = new HashSet<>();
 
+    @Builder.Default
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
     private Boolean enabled = true;
 
