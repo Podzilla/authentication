@@ -1,6 +1,6 @@
 package com.podzilla.auth.security;
 
-import com.podzilla.auth.service.CustomUserDetailsService;
+import com.podzilla.auth.service.CacheService;
 import com.podzilla.auth.service.TokenService;
 import io.micrometer.common.lang.NonNullApi;
 import jakarta.servlet.FilterChain;
@@ -23,13 +23,13 @@ import java.io.IOException;
 @Component
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final CacheService cacheService;
 
     public JWTAuthenticationFilter(
             final TokenService tokenService,
-            final CustomUserDetailsService customUserDetailsService) {
+            final CacheService cacheService) {
         this.tokenService = tokenService;
-        this.customUserDetailsService = customUserDetailsService;
+        this.cacheService = cacheService;
     }
 
     private static final Logger LOGGER =
@@ -47,8 +47,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             String userEmail = tokenService.extractEmail();
 
             UserDetails userDetails =
-                    customUserDetailsService
-                            .loadUserByUsernameCached(userEmail);
+                    cacheService.loadUserByUsername(userEmail);
 
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(

@@ -5,7 +5,6 @@ import com.podzilla.auth.exception.ValidationException;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -34,10 +33,5 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         return getUserDetails(user);
-    }
-
-    @Cacheable(value = "userDetails", key = "#email")
-    public UserDetails loadUserByUsernameCached(final String email) {
-        return loadUserByUsername(email);
     }
 }

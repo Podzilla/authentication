@@ -48,10 +48,7 @@ public class AuthenticationService {
     public String login(final LoginRequest loginRequest,
                         final HttpServletResponse response) {
 
-        if (SecurityContextHolder.getContext().getAuthentication()
-                instanceof UsernamePasswordAuthenticationToken) {
-            throw new InvalidActionException("User already logged in.");
-        }
+        checkUserLoggedIn("User already logged in.");
 
         Authentication authenticationRequest =
                 UsernamePasswordAuthenticationToken.
@@ -72,6 +69,8 @@ public class AuthenticationService {
     }
 
     public void registerAccount(final SignupRequest signupRequest) {
+        checkUserLoggedIn("User cannot register while logged in.");
+
         checkNotNullValidationException(signupRequest,
                 "Signup request cannot be null.");
         checkNotNullValidationException(signupRequest.getEmail(),
@@ -124,23 +123,30 @@ public class AuthenticationService {
     }
 
     private void checkNotNullValidationException(final String value,
-                                                final String message) {
+                                                 final String message) {
         if (value == null || value.isEmpty()) {
             throw new ValidationException(message);
         }
     }
 
     private void checkNotNullValidationException(final Object value,
-                                                final String message) {
+                                                 final String message) {
         if (value == null) {
             throw new ValidationException(message);
         }
     }
 
     private void checkNotNullAccessDeniedException(final Object value,
-                                                  final String message) {
+                                                   final String message) {
         if (value == null) {
             throw new AccessDeniedException(message);
+        }
+    }
+
+    private void checkUserLoggedIn(final String message) {
+        if (SecurityContextHolder.getContext().getAuthentication()
+                instanceof UsernamePasswordAuthenticationToken) {
+            throw new InvalidActionException(message);
         }
     }
 }

@@ -6,8 +6,6 @@ import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -26,11 +24,14 @@ public class AdminService {
 
     private final UserRepository userRepository;
     private final UserService userService;
+    private final CacheService cacheService;
 
     public AdminService(final UserRepository userRepository,
-                        final UserService userService) {
+                        final UserService userService,
+                        final CacheService cacheService) {
         this.userRepository = userRepository;
         this.userService = userService;
+        this.cacheService = cacheService;
     }
 
     public List<User> getUsers() {
@@ -44,7 +45,7 @@ public class AdminService {
         LOGGER.debug("Updating isActive status for userId={} "
                 + "from {} to {}", userId, user.getEnabled(), isActive);
         user.setEnabled(isActive);
-        updateUserDetailsCache(user);
+        cacheService.updateUserDetailsCache(user);
         userRepository.save(user);
         LOGGER.debug("User activation status updated "
                 + "successfully for userId={}", userId);
@@ -55,21 +56,9 @@ public class AdminService {
     public void deleteUser(final UUID userId) {
         User user = userService.getUserOrThrow(userId);
         LOGGER.debug("Deleting user with userId={}", userId);
-        evictUserDetailsCache(user);
+        cacheService.evictUserDetailsCache(user);
         userRepository.delete(user);
         LOGGER.debug("User deleted successfully with userId={}", userId);
-    }
-
-    @CacheEvict(value = "userDetails", key = "#user.email")
-    public void evictUserDetailsCache(final User user) {
-        LOGGER.debug("Evicting user details cache for userId={}", user.getId());
-    }
-
-    @CachePut(value = "userDetails", key = "#user.email")
-    public UserDetails updateUserDetailsCache(final User user) {
-        LOGGER.debug("Updating user details cache for userId={}", user.getId());
-
-        return getUserDetails(user);
     }
 
     public static UserDetails getUserDetails(final User user) {
