@@ -24,9 +24,9 @@ public class CacheService {
         this.customUserDetailsService = customUserDetailsService;
     }
 
-    @CacheEvict(value = "userDetails", key = "#user.email")
-    public void evictUserDetailsCache(final User user) {
-        LOGGER.debug("Evicting user details cache for userId={}", user.getId());
+    @Cacheable(value = "userDetails", key = "#email")
+    public UserDetails loadUserByUsername(final String email) {
+        return customUserDetailsService.loadUserByUsername(email);
     }
 
     @CachePut(value = "userDetails", key = "#user.email")
@@ -36,8 +36,8 @@ public class CacheService {
         return getUserDetails(user);
     }
 
-    @Cacheable(value = "userDetails", key = "#email")
-    public UserDetails loadUserByUsername(final String email) {
-        return customUserDetailsService.loadUserByUsername(email);
+    @CacheEvict(value = "userDetails", key = "#user.email")
+    public void evictUserDetailsCache(final User user) {
+        LOGGER.debug("Evicting user details cache for userId={}", user.getId());
     }
 }
