@@ -49,12 +49,13 @@ public class CustomUserDetails implements UserDetails {
         this.enabled = true;
     }
 
-    public CustomUserDetails(final String username, final String password,
-                             final Set<GrantedAuthority> authorities,
+    public CustomUserDetails(final String username,
+                             final String password,
+                             final boolean enabled,
                              final boolean accountNonExpired,
                              final boolean accountNonLocked,
                              final boolean credentialsNonExpired,
-                             final boolean enabled) {
+                             final Set<GrantedAuthority> authorities) {
         this.username = username;
         this.password = password;
         this.authorities = authorities;
