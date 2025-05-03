@@ -55,6 +55,7 @@ class CustomUserDetailsServiceTest {
                 .email(userEmail)
                 .password(userPassword)
                 .roles(roles)
+                .enabled(true)
                 .build();
     }
 

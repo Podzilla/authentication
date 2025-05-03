@@ -141,7 +141,7 @@ class AuthenticationServiceTest {
             authenticationService.registerAccount(signupRequest);
         });
 
-        assertEquals("Validation error: Password cannot be empty.",
+        assertEquals("Validation error: Password cannot be null.",
                 exception.getMessage());
         verify(userRepository, never()).existsByEmail(anyString());
         verify(passwordEncoder, never()).encode(anyString());
