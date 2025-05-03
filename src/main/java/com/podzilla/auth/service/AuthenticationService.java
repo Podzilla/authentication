@@ -92,7 +92,6 @@ public class AuthenticationService {
                         .password(
                                 passwordEncoder.encode(
                                         signupRequest.getPassword()))
-                        .enabled(true)
                         .build();
         Role role = roleRepository.findByErole(ERole.ROLE_USER).orElse(null);
 
