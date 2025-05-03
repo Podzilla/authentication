@@ -72,20 +72,14 @@ public class AuthenticationService {
     }
 
     public void registerAccount(final SignupRequest signupRequest) {
-        if (signupRequest.getPassword() == null
-                || signupRequest.getPassword().isEmpty()) {
-            throw new ValidationException("Password cannot be empty.");
-        }
-
-        if (signupRequest.getName() == null
-                || signupRequest.getName().isEmpty()) {
-            throw new ValidationException("Name cannot be empty.");
-        }
-
-        if (signupRequest.getEmail() == null
-                || signupRequest.getEmail().isEmpty()) {
-            throw new ValidationException("Email cannot be empty.");
-        }
+        checkNotNullValidationException(signupRequest,
+                "Signup request cannot be null.");
+        checkNotNullValidationException(signupRequest.getEmail(),
+                "Email cannot be null.");
+        checkNotNullValidationException(signupRequest.getPassword(),
+                "Password cannot be null.");
+        checkNotNullValidationException(signupRequest.getName(),
+                "Name cannot be null.");
 
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new ValidationException("Email already in use.");
@@ -101,9 +95,7 @@ public class AuthenticationService {
                         .build();
         Role role = roleRepository.findByErole(ERole.ROLE_USER).orElse(null);
 
-        if (role == null) {
-            throw new ValidationException("Role_USER not found.");
-        }
+        checkNotNullValidationException(role, "Role_USER not found.");
 
         account.setRoles(Collections.singleton(role));
         userRepository.save(account);
@@ -120,15 +112,35 @@ public class AuthenticationService {
         try {
             String refreshToken =
                     tokenService.getRefreshTokenFromCookie(request);
-            if (refreshToken == null) {
-                throw new AccessDeniedException("Refresh token not found.");
-            }
+            checkNotNullAccessDeniedException(refreshToken,
+                    "Refresh token cannot be found.");
             String email =
                     tokenService.renewRefreshToken(refreshToken, response);
             tokenService.generateAccessToken(email, response);
             return email;
         } catch (IllegalArgumentException e) {
             throw new AccessDeniedException("Invalid refresh token.");
+        }
+    }
+
+    public void checkNotNullValidationException(final String value,
+                                                final String message) {
+        if (value == null || value.isEmpty()) {
+            throw new ValidationException(message);
+        }
+    }
+
+    public void checkNotNullValidationException(final Object value,
+                                                final String message) {
+        if (value == null) {
+            throw new ValidationException(message);
+        }
+    }
+
+    public void checkNotNullAccessDeniedException(final Object value,
+                                                  final String message) {
+        if (value == null) {
+            throw new AccessDeniedException(message);
         }
     }
 }
