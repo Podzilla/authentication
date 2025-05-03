@@ -29,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -74,7 +75,7 @@ class AuthenticationServiceTest {
 
         userRole = new Role(ERole.ROLE_USER);
         user = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .name("Test User")
                 .email("test@example.com")
                 .password("encodedPassword")

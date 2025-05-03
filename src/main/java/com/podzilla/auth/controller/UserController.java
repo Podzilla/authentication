@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -29,7 +32,7 @@ public class UserController {
             description = "Allows user to update their name.")
     @ApiResponse(responseCode = "200",
             description = "User profile updated successfully")
-    public void updateProfile(@PathVariable final Long userId,
+    public void updateProfile(@PathVariable final UUID userId,
                               @Valid @RequestBody final String name) {
         LOGGER.debug("Received updateProfile request for userId={}", userId);
         userService.updateUserProfile(userId, name);

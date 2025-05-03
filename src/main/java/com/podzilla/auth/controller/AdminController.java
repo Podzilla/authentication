@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/admin")
@@ -45,7 +46,7 @@ public class AdminController {
             description = "User activation status updated successfully")
     public void updateUserActivation(
             @Parameter(description = "ID of the user to activate/deactivate")
-            @PathVariable final Long userId,
+            @PathVariable final UUID userId,
 
             @Parameter(description = "Set to true to activate,"
                     + " false to deactivate the user")
@@ -65,7 +66,7 @@ public class AdminController {
             description = "User deleted successfully")
     public void deleteUser(
             @Parameter(description = "ID of the user to delete")
-            @PathVariable final Long userId) {
+            @PathVariable final UUID userId) {
 
         LOGGER.debug("Admin requested to delete user with userId={}", userId);
         adminService.deleteUser(userId);

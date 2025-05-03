@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,7 +51,7 @@ class CustomUserDetailsServiceTest {
         roles.add(adminRole);
 
         user = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .name("Test User")
                 .email(userEmail)
                 .password(userPassword)
@@ -107,7 +108,7 @@ class CustomUserDetailsServiceTest {
         // Arrange
         String emailWithNoRoles = "norole@example.com";
         User userWithNoRoles = User.builder()
-                .id(2L)
+                .id(UUID.randomUUID())
                 .name("No Role User")
                 .email(emailWithNoRoles)
                 .password("password123")
@@ -130,7 +131,7 @@ class CustomUserDetailsServiceTest {
         // Arrange
         String emailWithNullRoles = "nullrole@example.com";
         User userWithNullRoles = User.builder()
-                .id(3L)
+                .id(UUID.randomUUID())
                 .name("Null Role User")
                 .email(emailWithNullRoles)
                 .password("password456")

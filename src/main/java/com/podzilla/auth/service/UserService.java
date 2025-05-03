@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class UserService {
 
@@ -22,7 +24,7 @@ public class UserService {
 
 
     @Transactional
-    public void updateUserProfile(final Long userId, final String name) {
+    public void updateUserProfile(final UUID userId, final String name) {
         User user = getUserOrThrow(userId);
         LOGGER.debug("Updating name for userId={}", userId);
         user.setName(name);
@@ -31,7 +33,7 @@ public class UserService {
     }
 
 
-    public User getUserOrThrow(final Long userId) {
+    public User getUserOrThrow(final UUID userId) {
         LOGGER.debug("Fetching user with id={}", userId);
         return userRepository.findById(userId)
                 .orElseThrow(() -> {

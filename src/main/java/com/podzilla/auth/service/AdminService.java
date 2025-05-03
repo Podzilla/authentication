@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +38,7 @@ public class AdminService {
     }
 
     @Transactional
-    public void updateUserActivation(final Long userId,
+    public void updateUserActivation(final UUID userId,
                                      final boolean isActive) {
         User user = userService.getUserOrThrow(userId);
         LOGGER.debug("Updating isActive status for userId={} "
@@ -51,7 +52,7 @@ public class AdminService {
 
 
     @Transactional
-    public void deleteUser(final Long userId) {
+    public void deleteUser(final UUID userId) {
         User user = userService.getUserOrThrow(userId);
         LOGGER.debug("Deleting user with userId={}", userId);
         evictUserDetailsCache(user);
