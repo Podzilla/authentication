@@ -123,21 +123,21 @@ public class AuthenticationService {
         }
     }
 
-    public void checkNotNullValidationException(final String value,
+    private void checkNotNullValidationException(final String value,
                                                 final String message) {
         if (value == null || value.isEmpty()) {
             throw new ValidationException(message);
         }
     }
 
-    public void checkNotNullValidationException(final Object value,
+    private void checkNotNullValidationException(final Object value,
                                                 final String message) {
         if (value == null) {
             throw new ValidationException(message);
         }
     }
 
-    public void checkNotNullAccessDeniedException(final Object value,
+    private void checkNotNullAccessDeniedException(final Object value,
                                                   final String message) {
         if (value == null) {
             throw new AccessDeniedException(message);
