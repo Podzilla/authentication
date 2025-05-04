@@ -122,6 +122,19 @@ public class AuthenticationService {
         }
     }
 
+    public UserDetails getCurrentUserDetails() {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetails) {
+            return (UserDetails) principal;
+        } else {
+            throw new InvalidActionException(
+                    "User details not saved correctly.");
+        }
+    }
+
     private void checkNotNullValidationException(final String value,
                                                  final String message) {
         if (value == null || value.isEmpty()) {
