@@ -123,10 +123,9 @@ public class AuthenticationService {
     }
 
     public UserDetails getCurrentUserDetails() {
-        checkUserNotLoggedIn("User is not logged in.");
-
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
+
         Object principal = authentication.getPrincipal();
         if (principal instanceof UserDetails) {
             return (UserDetails) principal;
@@ -160,13 +159,6 @@ public class AuthenticationService {
     private void checkUserLoggedIn(final String message) {
         if (SecurityContextHolder.getContext().getAuthentication()
                 instanceof UsernamePasswordAuthenticationToken) {
-            throw new InvalidActionException(message);
-        }
-    }
-
-    private void checkUserNotLoggedIn(final String message) {
-        if (!(SecurityContextHolder.getContext().getAuthentication()
-                instanceof UsernamePasswordAuthenticationToken)) {
             throw new InvalidActionException(message);
         }
     }
