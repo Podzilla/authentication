@@ -1,5 +1,6 @@
 package com.podzilla.auth.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
@@ -35,6 +36,7 @@ public class RefreshToken {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
     private User user;

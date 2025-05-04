@@ -20,13 +20,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.util.WebUtils;
 
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -60,7 +58,7 @@ class TokenServiceTest {
     // Test data
     private final String testEmail = "test@example.com";
     private final String testSecret = "testSecretKeyForJwtTokenGenerationWhichIsVeryLongAndSecure"; // Use a valid Base64 encoded key if possible
-    private final Long testUserId = 115642L;
+    private final UUID testUserId = UUID.randomUUID();
     private final UUID testRefreshTokenId = UUID.randomUUID();
 
     @BeforeEach
