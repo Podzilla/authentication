@@ -122,6 +122,20 @@ public class AuthenticationService {
         }
     }
 
+    public UserDetails getCurrentUserDetails() {
+        checkUserNotLoggedIn("User is not logged in.");
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetails) {
+            return (UserDetails) principal;
+        } else {
+            throw new InvalidActionException(
+                    "User details not saved correctly.");
+        }
+    }
+
     private void checkNotNullValidationException(final String value,
                                                  final String message) {
         if (value == null || value.isEmpty()) {
@@ -146,6 +160,13 @@ public class AuthenticationService {
     private void checkUserLoggedIn(final String message) {
         if (SecurityContextHolder.getContext().getAuthentication()
                 instanceof UsernamePasswordAuthenticationToken) {
+            throw new InvalidActionException(message);
+        }
+    }
+
+    private void checkUserNotLoggedIn(final String message) {
+        if (!(SecurityContextHolder.getContext().getAuthentication()
+                instanceof UsernamePasswordAuthenticationToken)) {
             throw new InvalidActionException(message);
         }
     }
