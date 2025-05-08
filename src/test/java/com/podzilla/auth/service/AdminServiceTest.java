@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,4 +41,54 @@ class AdminServiceTest {
 
         verify(userRepository).findAll();
     }
+
+    @Test
+    void updateUserActivation_shouldActivateUserSuccessfully() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("user@example.com")
+                .name("Test User")
+                .enabled(false)
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        adminService.updateUserActivation(userId, true);
+
+        verify(userRepository).findById(userId);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void updateUserActivation_shouldDeactivateUserSuccessfully() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("user@example.com")
+                .name("Test User")
+                .enabled(true)
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        adminService.updateUserActivation(userId, false);
+
+        verify(userRepository).findById(userId);
+        verify(userRepository).save(user);
+    }
+
+
+    @Test
+    void deleteUser_shouldDeleteUserSuccessfully() {
+        UUID userId = UUID.randomUUID();
+
+        when(userRepository.existsById(userId)).thenReturn(true);
+
+        adminService.deleteUser(userId);
+
+        verify(userRepository).existsById(userId);
+        verify(userRepository).deleteById(userId);
+    }
+    
 }
