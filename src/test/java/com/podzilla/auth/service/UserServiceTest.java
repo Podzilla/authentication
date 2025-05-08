@@ -72,7 +72,7 @@ class UserServiceTest {
             userService.updateUserProfile(userId, "New Name");
         });
 
-        assertEquals("User with id " + userId + " does not exist.", exception.getMessage());
+        assertEquals("Not Found: User with id " + userId + " does not exist.", exception.getMessage());
         verify(userRepository).findById(userId);
         verify(userRepository, never()).save(any(User.class));
     }

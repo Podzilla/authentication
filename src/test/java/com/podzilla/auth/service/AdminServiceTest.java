@@ -23,6 +23,12 @@ class AdminServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private CacheService cacheService;
+
     @InjectMocks
     private AdminService adminService;
 
@@ -52,13 +58,15 @@ class AdminServiceTest {
                 .enabled(false)
                 .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userService.getUserOrThrow(userId)).thenReturn(user);
 
         adminService.updateUserActivation(userId, true);
 
-        verify(userRepository).findById(userId);
+        verify(userService).getUserOrThrow(userId);
         verify(userRepository).save(user);
+        verify(cacheService).updateUserDetailsCache(user);
     }
+
 
     @Test
     void updateUserActivation_shouldDeactivateUserSuccessfully() {
@@ -70,25 +78,35 @@ class AdminServiceTest {
                 .enabled(true)
                 .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userService.getUserOrThrow(userId)).thenReturn(user);
 
         adminService.updateUserActivation(userId, false);
 
-        verify(userRepository).findById(userId);
+        verify(userService).getUserOrThrow(userId);
         verify(userRepository).save(user);
+        verify(cacheService).updateUserDetailsCache(user);
     }
+
 
 
     @Test
     void deleteUser_shouldDeleteUserSuccessfully() {
         UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("user@example.com")
+                .name("Test User")
+                .enabled(true)
+                .build();
 
-        when(userRepository.existsById(userId)).thenReturn(true);
+        when(userService.getUserOrThrow(userId)).thenReturn(user);
 
         adminService.deleteUser(userId);
 
-        verify(userRepository).existsById(userId);
-        verify(userRepository).deleteById(userId);
+        verify(userService).getUserOrThrow(userId);
+        verify(cacheService).evictUserDetailsCache(user);
+        verify(userRepository).delete(user);
     }
-    
+
+
 }
