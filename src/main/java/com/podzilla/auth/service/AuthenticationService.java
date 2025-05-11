@@ -122,17 +122,35 @@ public class AuthenticationService {
         }
     }
 
-    public UserDetails getCurrentUserDetails() {
+    public void addUserDetailsInHeader(
+            final HttpServletResponse response) {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
         Object principal = authentication.getPrincipal();
         if (principal instanceof UserDetails) {
-            return (UserDetails) principal;
+            UserDetails userDetails = (UserDetails) principal;
+            String email = userDetails.getUsername();
+            StringBuilder roles = new StringBuilder();
+            userDetails.getAuthorities().forEach((authority) -> {
+                if (!roles.isEmpty()) {
+                    roles.append(", ");
+                }
+                roles.append(authority.getAuthority());
+            });
+            setRoleAndEmailInHeader(response, email, roles.toString());
         } else {
             throw new InvalidActionException(
                     "User details not saved correctly.");
         }
+    }
+
+    private void setRoleAndEmailInHeader(
+            final HttpServletResponse response,
+            final String email,
+            final String roles) {
+        response.setHeader("X-User-Email", email);
+        response.setHeader("X-User-Roles", roles);
     }
 
     private void checkNotNullValidationException(final String value,
