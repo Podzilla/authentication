@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -113,9 +112,8 @@ public class AuthenticationController {
             responseCode = "200",
             description = "User details fetched successfully"
     )
-    public UserDetails getCurrentUser() {
-        UserDetails userDetails = authenticationService.getCurrentUserDetails();
-        LOGGER.info("Fetched details for user {}", userDetails.getUsername());
-        return userDetails;
+    public void addUserDetailsInHeader(final HttpServletResponse response) {
+        authenticationService.addUserDetailsInHeader(response);
+        LOGGER.info("Fetching current user details and adding to header");
     }
 }
