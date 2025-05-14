@@ -84,19 +84,20 @@ public class AuthenticationService {
             throw new ValidationException("Email already in use.");
         }
 
+        Role role = roleRepository.findByErole(ERole.ROLE_USER).orElse(null);
+
+        checkNotNullValidationException(role, "Role_USER not found.");
+
         User account =
-                User.builder()
+                new User.Builder()
                         .name(signupRequest.getName())
                         .email(signupRequest.getEmail())
                         .password(
                                 passwordEncoder.encode(
                                         signupRequest.getPassword()))
+                        .roles(Collections.singleton(role))
                         .build();
-        Role role = roleRepository.findByErole(ERole.ROLE_USER).orElse(null);
 
-        checkNotNullValidationException(role, "Role_USER not found.");
-
-        account.setRoles(Collections.singleton(role));
         userRepository.save(account);
     }
 

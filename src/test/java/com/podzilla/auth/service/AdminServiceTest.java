@@ -27,8 +27,8 @@ class AdminServiceTest {
 
     @Test
     void getUsers_shouldReturnListOfUsers() {
-        User user1 = User.builder().id(UUID.randomUUID()).email("user1@example.com").name("User One").build();
-        User user2 = User.builder().id(UUID.randomUUID()).email("user2@example.com").name("User Two").build();
+        User user1 = new User.Builder().id(UUID.randomUUID()).email("user1@example.com").name("User One").build();
+        User user2 = new User.Builder().id(UUID.randomUUID()).email("user2@example.com").name("User Two").build();
         List<User> expectedUsers = Arrays.asList(user1, user2);
 
         when(userRepository.findAll()).thenReturn(expectedUsers);

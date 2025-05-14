@@ -74,7 +74,7 @@ class AuthenticationServiceTest {
         loginRequest.setPassword("password123");
 
         userRole = new Role(ERole.ROLE_USER);
-        user = User.builder()
+        user = new User.Builder()
                 .id(UUID.randomUUID())
                 .name("Test User")
                 .email("test@example.com")
