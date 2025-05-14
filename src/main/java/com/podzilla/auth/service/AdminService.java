@@ -10,7 +10,6 @@ import com.podzilla.auth.repository.UserRepository;
 import com.podzilla.mq.EventPublisher;
 import com.podzilla.mq.EventsConstants;
 import com.podzilla.mq.events.CourierRegisteredEvent;
-import com.podzilla.mq.events.CustomerRegisteredEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
