@@ -72,17 +72,13 @@ public class AuthenticationService {
     public void registerAccount(final SignupRequest signupRequest) {
         checkUserLoggedIn("User cannot register while logged in.");
 
-        checkNotNullValidationException(signupRequest,
-                "Signup request cannot be null.");
-        checkNotNullValidationException(signupRequest.getEmail(),
-                "Email cannot be null.");
-        checkNotNullValidationException(signupRequest.getPassword(),
-                "Password cannot be null.");
-        checkNotNullValidationException(signupRequest.getName(),
-                "Name cannot be null.");
-
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new ValidationException("Email already in use.");
+        }
+
+        if (userRepository.existsByMobileNumber(
+                signupRequest.getMobileNumber())) {
+            throw new ValidationException("Mobile number already in use.");
         }
 
         User account =
@@ -92,6 +88,7 @@ public class AuthenticationService {
                         .password(
                                 passwordEncoder.encode(
                                         signupRequest.getPassword()))
+                        .mobileNumber(signupRequest.getMobileNumber())
                         .build();
         Role role = roleRepository.findByErole(ERole.ROLE_USER).orElse(null);
 
@@ -159,13 +156,6 @@ public class AuthenticationService {
         response.setHeader("X-User-Email", email);
         response.setHeader("X-User-Roles", roles);
         response.setHeader("X-User-Id", id);
-    }
-
-    private void checkNotNullValidationException(final String value,
-                                                 final String message) {
-        if (value == null || value.isEmpty()) {
-            throw new ValidationException(message);
-        }
     }
 
     private void checkNotNullValidationException(final Object value,

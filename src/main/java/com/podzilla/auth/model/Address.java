@@ -35,18 +35,13 @@ public class Address {
     @JsonIgnore
     private User user;
 
-    @NotBlank(message = "Street is required")
     private String street;
 
-    @NotBlank(message = "City is required")
     private String city;
 
-    @NotBlank(message = "State is required")
     private String state;
 
-    @NotBlank(message = "Country is required")
     private String country;
 
-    @NotBlank(message = "Postal code is required")
     private String postalCode;
 }
