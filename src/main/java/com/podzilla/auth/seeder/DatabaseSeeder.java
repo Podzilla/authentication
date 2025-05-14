@@ -19,5 +19,6 @@ public class DatabaseSeeder implements CommandLineRunner {
     public void run(final String... args) throws Exception {
         roleRepository.save(new Role(ERole.ROLE_USER));
         roleRepository.save(new Role(ERole.ROLE_ADMIN));
+        roleRepository.save(new Role(ERole.ROLE_COURIER));
     }
 }

@@ -11,6 +11,9 @@ import com.podzilla.auth.model.Role;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.RoleRepository;
 import com.podzilla.auth.repository.UserRepository;
+import com.podzilla.mq.EventPublisher;
+import com.podzilla.mq.EventsConstants;
+import com.podzilla.mq.events.CustomerRegisteredEvent;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.AccessDeniedException;
@@ -33,18 +36,21 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final TokenService tokenService;
     private final RoleRepository roleRepository;
+    private final EventPublisher eventPublisher;
 
     public AuthenticationService(
             final AuthenticationManager authenticationManager,
             final PasswordEncoder passwordEncoder,
             final UserRepository userRepository,
             final TokenService tokenService,
-            final RoleRepository roleRepository) {
+            final RoleRepository roleRepository,
+            final EventPublisher eventPublisher) {
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.tokenService = tokenService;
         this.roleRepository = roleRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     public String login(final LoginRequest loginRequest,
@@ -108,6 +114,10 @@ public class AuthenticationService {
 
         account.setRoles(Collections.singleton(role));
         userRepository.save(account);
+
+        eventPublisher.publishEvent(EventsConstants.CUSTOMER_REGISTERED,
+                new CustomerRegisteredEvent(account.getId().toString(),
+                        account.getName()));
     }
 
     public void logoutUser(
