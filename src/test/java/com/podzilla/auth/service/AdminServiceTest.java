@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,6 +22,12 @@ class AdminServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private CacheService cacheService;
 
     @InjectMocks
     private AdminService adminService;
@@ -40,4 +47,66 @@ class AdminServiceTest {
 
         verify(userRepository).findAll();
     }
+
+    @Test
+    void updateUserActivation_shouldActivateUserSuccessfully() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("user@example.com")
+                .name("Test User")
+                .enabled(false)
+                .build();
+
+        when(userService.getUserOrThrow(userId)).thenReturn(user);
+
+        adminService.updateUserActivation(userId, true);
+
+        verify(userService).getUserOrThrow(userId);
+        verify(userRepository).save(user);
+        verify(cacheService).updateUserDetailsCache(user);
+    }
+
+
+    @Test
+    void updateUserActivation_shouldDeactivateUserSuccessfully() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("user@example.com")
+                .name("Test User")
+                .enabled(true)
+                .build();
+
+        when(userService.getUserOrThrow(userId)).thenReturn(user);
+
+        adminService.updateUserActivation(userId, false);
+
+        verify(userService).getUserOrThrow(userId);
+        verify(userRepository).save(user);
+        verify(cacheService).updateUserDetailsCache(user);
+    }
+
+
+
+    @Test
+    void deleteUser_shouldDeleteUserSuccessfully() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("user@example.com")
+                .name("Test User")
+                .enabled(true)
+                .build();
+
+        when(userService.getUserOrThrow(userId)).thenReturn(user);
+
+        adminService.deleteUser(userId);
+
+        verify(userService).getUserOrThrow(userId);
+        verify(cacheService).evictUserDetailsCache(user);
+        verify(userRepository).delete(user);
+    }
+
+
 }

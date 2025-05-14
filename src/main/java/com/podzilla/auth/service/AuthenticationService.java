@@ -122,7 +122,6 @@ public class AuthenticationService {
 
     public void addUserDetailsInHeader(
             final HttpServletResponse response) {
-
         CustomUserDetails userDetails = getCurrentUserDetails();
         String email = userDetails.getUsername();
         StringBuilder roles = new StringBuilder();
