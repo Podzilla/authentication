@@ -3,15 +3,12 @@ package com.podzilla.auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
-import com.podzilla.auth.model.Address;
 import com.podzilla.auth.model.ERole;
 import com.podzilla.auth.model.Role;
 import com.podzilla.auth.model.User;
-import com.podzilla.auth.repository.AddressRepository;
 import com.podzilla.auth.repository.RoleRepository;
 import com.podzilla.auth.repository.UserRepository;
 import com.podzilla.auth.service.TokenService; // Assuming you have a JwtService
-import com.podzilla.mq.events.DeliveryAddress;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,21 +66,11 @@ class AuthenticationControllerTest {
         userRole.setErole(ERole.ROLE_USER);
         roleRepository.save(userRole);
 
-        Address address = new Address();
-        address.setStreet("123 Test St");
-        address.setCity("Test City");
-        address.setState("Test State");
-        address.setCountry("Test Country");
-        address.setPostalCode("12345");
-
         // Create a pre-existing user for login tests
         User user = new User();
         user.setEmail(testUserEmail);
         user.setPassword(passwordEncoder.encode(testUserPassword));
         user.setName("Test User"); // Assuming name is required or desired
-        user.setMobileNumber("1234567890");
-        user.setAddress(address);
-        address.setUser(user);
         user.getRoles().add(userRole);
         userRepository.save(user);
     }
@@ -100,9 +87,6 @@ class AuthenticationControllerTest {
         signupRequest.setEmail("newuser@example.com");
         signupRequest.setPassword("newpassword");
         signupRequest.setName("New User");
-        signupRequest.setMobileNumber("1234562137890");
-        signupRequest.setAddress(new DeliveryAddress("456 New St", "New City",
-                "New State", "New Country", "54321"));
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)

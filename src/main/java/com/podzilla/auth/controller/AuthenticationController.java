@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +43,7 @@ public class AuthenticationController {
             description = "User logged in successfully"
     )
     public ResponseEntity<?> login(
-            @Valid @RequestBody final LoginRequest loginRequest,
+            @RequestBody final LoginRequest loginRequest,
             final HttpServletResponse response) {
         String email = authenticationService.login(loginRequest, response);
         LOGGER.info("User {} logged in", email);
@@ -63,7 +62,7 @@ public class AuthenticationController {
             description = "User registered successfully"
     )
     public ResponseEntity<?> registerUser(
-            @Valid @RequestBody final SignupRequest signupRequest) {
+            @RequestBody final SignupRequest signupRequest) {
         authenticationService.registerAccount(signupRequest);
         LOGGER.info("User {} registered", signupRequest.getEmail());
         return new ResponseEntity<>("Account registered.",

@@ -1,6 +1,5 @@
 package com.podzilla.auth.service;
 
-import com.podzilla.auth.dto.CustomUserDetails;
 import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
 import com.podzilla.auth.exception.InvalidActionException;
@@ -72,13 +71,17 @@ public class AuthenticationService {
     public void registerAccount(final SignupRequest signupRequest) {
         checkUserLoggedIn("User cannot register while logged in.");
 
+        checkNotNullValidationException(signupRequest,
+                "Signup request cannot be null.");
+        checkNotNullValidationException(signupRequest.getEmail(),
+                "Email cannot be null.");
+        checkNotNullValidationException(signupRequest.getPassword(),
+                "Password cannot be null.");
+        checkNotNullValidationException(signupRequest.getName(),
+                "Name cannot be null.");
+
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new ValidationException("Email already in use.");
-        }
-
-        if (userRepository.existsByMobileNumber(
-                signupRequest.getMobileNumber())) {
-            throw new ValidationException("Mobile number already in use.");
         }
 
         User account =
@@ -88,7 +91,6 @@ public class AuthenticationService {
                         .password(
                                 passwordEncoder.encode(
                                         signupRequest.getPassword()))
-                        .mobileNumber(signupRequest.getMobileNumber())
                         .build();
         Role role = roleRepository.findByErole(ERole.ROLE_USER).orElse(null);
 
@@ -122,26 +124,21 @@ public class AuthenticationService {
 
     public void addUserDetailsInHeader(
             final HttpServletResponse response) {
-
-        CustomUserDetails userDetails = getCurrentUserDetails();
-        String email = userDetails.getUsername();
-        StringBuilder roles = new StringBuilder();
-        userDetails.getAuthorities().forEach((authority) -> {
-            if (!roles.isEmpty()) {
-                roles.append(", ");
-            }
-            roles.append(authority.getAuthority());
-        });
-        setRoleAndEmailInHeader(response, email, roles.toString(),
-                userDetails.getId().toString());
-    }
-
-    public static CustomUserDetails getCurrentUserDetails() {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
+
         Object principal = authentication.getPrincipal();
-        if (principal instanceof CustomUserDetails) {
-            return (CustomUserDetails) principal;
+        if (principal instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) principal;
+            String email = userDetails.getUsername();
+            StringBuilder roles = new StringBuilder();
+            userDetails.getAuthorities().forEach((authority) -> {
+                if (!roles.isEmpty()) {
+                    roles.append(", ");
+                }
+                roles.append(authority.getAuthority());
+            });
+            setRoleAndEmailInHeader(response, email, roles.toString());
         } else {
             throw new InvalidActionException(
                     "User details not saved correctly.");
@@ -151,11 +148,16 @@ public class AuthenticationService {
     private void setRoleAndEmailInHeader(
             final HttpServletResponse response,
             final String email,
-            final String roles,
-            final String id) {
+            final String roles) {
         response.setHeader("X-User-Email", email);
         response.setHeader("X-User-Roles", roles);
-        response.setHeader("X-User-Id", id);
+    }
+
+    private void checkNotNullValidationException(final String value,
+                                                 final String message) {
+        if (value == null || value.isEmpty()) {
+            throw new ValidationException(message);
+        }
     }
 
     private void checkNotNullValidationException(final Object value,
