@@ -4,11 +4,13 @@ import com.podzilla.auth.dto.CustomGrantedAuthority;
 import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
 import com.podzilla.auth.exception.ValidationException;
+import com.podzilla.auth.model.Address;
 import com.podzilla.auth.model.ERole;
 import com.podzilla.auth.model.Role;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.RoleRepository;
 import com.podzilla.auth.repository.UserRepository;
+import com.podzilla.mq.events.DeliveryAddress;
 import jakarta.servlet.http.HttpServletRequest; // Added import
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,6 +70,14 @@ class AuthenticationServiceTest {
         signupRequest.setName("Test User");
         signupRequest.setEmail("test@example.com");
         signupRequest.setPassword("password123");
+        signupRequest.setMobileNumber("1234567890");
+        DeliveryAddress deliveryAddress = new DeliveryAddress();
+        deliveryAddress.setStreet("123 Test St");
+        deliveryAddress.setCity("Test City");
+        deliveryAddress.setState("Test State");
+        deliveryAddress.setCountry("Test Country");
+        deliveryAddress.setPostalCode("12345");
+        signupRequest.setAddress(deliveryAddress);
 
         loginRequest = new LoginRequest();
         loginRequest.setEmail("test@example.com");
