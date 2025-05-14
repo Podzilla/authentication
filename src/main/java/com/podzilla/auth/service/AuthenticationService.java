@@ -1,5 +1,6 @@
 package com.podzilla.auth.service;
 
+import com.podzilla.auth.dto.CustomUserDetails;
 import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
 import com.podzilla.auth.exception.InvalidActionException;
@@ -124,21 +125,26 @@ public class AuthenticationService {
 
     public void addUserDetailsInHeader(
             final HttpServletResponse response) {
+
+        CustomUserDetails userDetails = getCurrentUserDetails();
+        String email = userDetails.getUsername();
+        StringBuilder roles = new StringBuilder();
+        userDetails.getAuthorities().forEach((authority) -> {
+            if (!roles.isEmpty()) {
+                roles.append(", ");
+            }
+            roles.append(authority.getAuthority());
+        });
+        setRoleAndEmailInHeader(response, email, roles.toString(),
+                userDetails.getId().toString());
+    }
+
+    public static CustomUserDetails getCurrentUserDetails() {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
-
         Object principal = authentication.getPrincipal();
-        if (principal instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) principal;
-            String email = userDetails.getUsername();
-            StringBuilder roles = new StringBuilder();
-            userDetails.getAuthorities().forEach((authority) -> {
-                if (!roles.isEmpty()) {
-                    roles.append(", ");
-                }
-                roles.append(authority.getAuthority());
-            });
-            setRoleAndEmailInHeader(response, email, roles.toString());
+        if (principal instanceof CustomUserDetails) {
+            return (CustomUserDetails) principal;
         } else {
             throw new InvalidActionException(
                     "User details not saved correctly.");
@@ -148,9 +154,11 @@ public class AuthenticationService {
     private void setRoleAndEmailInHeader(
             final HttpServletResponse response,
             final String email,
-            final String roles) {
+            final String roles,
+            final String id) {
         response.setHeader("X-User-Email", email);
         response.setHeader("X-User-Roles", roles);
+        response.setHeader("X-User-Id", id);
     }
 
     private void checkNotNullValidationException(final String value,

@@ -71,6 +71,7 @@ public class AdminService {
 
         return CustomUserDetails.builder()
                 .username(user.getEmail())
+                .id(user.getId())
                 .password(user.getPassword())
                 .enabled(user.getEnabled())
                 .authorities(authorities)

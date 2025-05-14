@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.FetchType;
 
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,6 +49,14 @@ public class User {
 
     @NotBlank(message = "Password is required")
     private String password;
+
+    @NotBlank(message = "Mobile number is required")
+    @Column(unique = true)
+    private String mobileNumber;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private Address address;
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
