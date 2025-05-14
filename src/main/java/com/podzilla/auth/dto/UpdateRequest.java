@@ -4,10 +4,8 @@ import com.podzilla.mq.events.DeliveryAddress;
 import lombok.Data;
 
 @Data
-public class SignupRequest {
+public class UpdateRequest {
     private String name;
-    private String email;
-    private String password;
-    private String mobileNumber;
     private DeliveryAddress address;
+    private String mobileNumber;
 }

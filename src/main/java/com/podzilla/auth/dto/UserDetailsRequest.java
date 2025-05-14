@@ -1,13 +1,12 @@
 package com.podzilla.auth.dto;
 
 import com.podzilla.mq.events.DeliveryAddress;
-import lombok.Data;
+import lombok.Builder;
 
-@Data
-public class SignupRequest {
-    private String name;
+@Builder
+public class UserDetailsRequest {
     private String email;
-    private String password;
+    private String name;
     private String mobileNumber;
     private DeliveryAddress address;
 }
