@@ -5,7 +5,6 @@ import com.podzilla.auth.dto.UserDetailsRequest;
 import com.podzilla.auth.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +31,7 @@ public class UserController {
             description = "Allows user to update their name.")
     @ApiResponse(responseCode = "200",
             description = "User profile updated successfully")
-    public void updateProfile(@Valid @RequestBody final UpdateRequest
+    public void updateProfile(@RequestBody final UpdateRequest
                                       updateRequest) {
         LOGGER.debug("Received updateProfile request");
         userService.updateUserProfile(updateRequest);
