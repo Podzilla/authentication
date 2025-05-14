@@ -5,6 +5,7 @@ import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
 import com.podzilla.auth.exception.InvalidActionException;
 import com.podzilla.auth.exception.ValidationException;
+import com.podzilla.auth.model.Address;
 import com.podzilla.auth.model.ERole;
 import com.podzilla.auth.model.Role;
 import com.podzilla.auth.model.User;
@@ -81,6 +82,14 @@ public class AuthenticationService {
             throw new ValidationException("Mobile number already in use.");
         }
 
+        Address address = Address.builder()
+                .street(signupRequest.getAddress().getStreet())
+                .city(signupRequest.getAddress().getCity())
+                .state(signupRequest.getAddress().getState())
+                .country(signupRequest.getAddress().getCountry())
+                .postalCode(signupRequest.getAddress().getPostalCode())
+                .build();
+
         User account =
                 User.builder()
                         .name(signupRequest.getName())
@@ -89,7 +98,10 @@ public class AuthenticationService {
                                 passwordEncoder.encode(
                                         signupRequest.getPassword()))
                         .mobileNumber(signupRequest.getMobileNumber())
+                        .address(address)
                         .build();
+        address.setUser(account);
+
         Role role = roleRepository.findByErole(ERole.ROLE_USER).orElse(null);
 
         checkNotNullValidationException(role, "Role_USER not found.");
