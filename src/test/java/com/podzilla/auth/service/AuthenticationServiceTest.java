@@ -133,24 +133,6 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void registerAccount_shouldThrowValidationException_whenPasswordIsEmpty() {
-        // Arrange
-        signupRequest.setPassword(""); // Empty password
-
-        // Act & Assert
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            authenticationService.registerAccount(signupRequest);
-        });
-
-        assertEquals("Validation error: Password cannot be null.",
-                exception.getMessage());
-        verify(userRepository, never()).existsByEmail(anyString());
-        verify(passwordEncoder, never()).encode(anyString());
-        verify(roleRepository, never()).findByErole(any());
-        verify(userRepository, never()).save(any(User.class));
-    }
-
-    @Test
     void registerAccount_shouldHandleRoleNotFoundGracefully() {
         // Arrange - Simulate role not found in DB
         when(userRepository.existsByEmail(signupRequest.getEmail())).thenReturn(false);

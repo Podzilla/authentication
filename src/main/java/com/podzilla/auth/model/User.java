@@ -39,18 +39,14 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotBlank(message = "Name is required")
     private String name;
 
-    @NotBlank(message = "Email is required")
     @Email
     @Column(unique = true)
     private String email;
 
-    @NotBlank(message = "Password is required")
     private String password;
 
-    @NotBlank(message = "Mobile number is required")
     @Column(unique = true)
     private String mobileNumber;
 
