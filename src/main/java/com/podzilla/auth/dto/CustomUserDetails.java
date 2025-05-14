@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Set;
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
@@ -20,6 +21,8 @@ import java.util.Set;
 public class CustomUserDetails implements UserDetails {
 
     private String username;
+
+    private UUID id;
 
     @JsonIgnore
     private String password;
