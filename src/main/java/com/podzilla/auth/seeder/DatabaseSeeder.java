@@ -4,8 +4,9 @@ import com.podzilla.auth.model.ERole;
 import com.podzilla.auth.model.Role;
 import com.podzilla.auth.repository.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
-
+@Component
 public class DatabaseSeeder implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
