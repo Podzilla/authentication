@@ -50,7 +50,7 @@ class CustomUserDetailsServiceTest {
         roles.add(userRole);
         roles.add(adminRole);
 
-        user = User.builder()
+        user = new User.Builder()
                 .id(UUID.randomUUID())
                 .name("Test User")
                 .email(userEmail)
@@ -107,7 +107,7 @@ class CustomUserDetailsServiceTest {
     void loadUserByUsername_shouldThrowValidationException_whenUserHasEmptyRoles() {
         // Arrange
         String emailWithNoRoles = "norole@example.com";
-        User userWithNoRoles = User.builder()
+        User userWithNoRoles = new User.Builder()
                 .id(UUID.randomUUID())
                 .name("No Role User")
                 .email(emailWithNoRoles)
@@ -130,7 +130,7 @@ class CustomUserDetailsServiceTest {
     void loadUserByUsername_shouldThrowValidationException_whenUserHasNullRoles() {
         // Arrange
         String emailWithNullRoles = "nullrole@example.com";
-        User userWithNullRoles = User.builder()
+        User userWithNullRoles = new User.Builder()
                 .id(UUID.randomUUID())
                 .name("Null Role User")
                 .email(emailWithNullRoles)

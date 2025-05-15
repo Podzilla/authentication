@@ -100,7 +100,7 @@ class TokenServiceTest {
     @DisplayName("Should generate new refresh token if none exists")
     void generateRefreshToken_WhenNoneExists_ShouldCreateNewAndAddCookie() {
         // Arrange
-        User user = User.builder().id(testUserId).email(testEmail).build();
+        User user = new User.Builder().id(testUserId).email(testEmail).build();
         when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(user));
         when(refreshTokenRepository.findByUserIdAndExpiresAtAfter(eq(testUserId), any(Instant.class)))
                 .thenReturn(Optional.empty()); // No existing valid token
@@ -142,7 +142,7 @@ class TokenServiceTest {
     @DisplayName("Should use existing refresh token if valid one exists")
     void generateRefreshToken_WhenValidExists_ShouldUseExistingAndAddCookie() {
         // Arrange
-        User user = User.builder().id(testUserId).email(testEmail).build();
+        User user = new User.Builder().id(testUserId).email(testEmail).build();
         RefreshToken existingToken = RefreshToken.builder()
                 .id(testRefreshTokenId)
                 .user(user)
@@ -195,7 +195,7 @@ class TokenServiceTest {
     @DisplayName("Should renew refresh token successfully")
     void renewRefreshToken_ValidToken_ShouldExpireOldCreateNewAddCookieAndReturnEmail() {
         // Arrange
-        User user = User.builder().id(testUserId).email(testEmail).build();
+        User user = new User.Builder().id(testUserId).email(testEmail).build();
         RefreshToken oldToken = RefreshToken.builder()
                 .id(testRefreshTokenId)
                 .user(user)
@@ -388,7 +388,7 @@ class TokenServiceTest {
         // Arrange
         setupClaimsForEmailExtraction(); // Simulate prior successful access token validation
 
-        User user = User.builder().id(testUserId).email(testEmail).build();
+        User user = new User.Builder().id(testUserId).email(testEmail).build();
         RefreshToken refreshToken = RefreshToken.builder()
                 .id(testRefreshTokenId)
                 .user(user)
@@ -444,7 +444,7 @@ class TokenServiceTest {
     void removeRefreshTokenFromCookieAndExpire_TokenNotFound_ShouldThrowValidationException() {
         // Arrange
         setupClaimsForEmailExtraction();
-        User user = User.builder().id(testUserId).email(testEmail).build();
+        User user = new User.Builder().id(testUserId).email(testEmail).build();
 
         when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(user));
         when(refreshTokenRepository.findByUserIdAndExpiresAtAfter(eq(testUserId), any(Instant.class)))
