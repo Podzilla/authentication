@@ -51,7 +51,7 @@ class AdminServiceTest {
     @Test
     void updateUserActivation_shouldActivateUserSuccessfully() {
         UUID userId = UUID.randomUUID();
-        User user = User.builder()
+        User user = new User.Builder()
                 .id(userId)
                 .email("user@example.com")
                 .name("Test User")
@@ -71,7 +71,7 @@ class AdminServiceTest {
     @Test
     void updateUserActivation_shouldDeactivateUserSuccessfully() {
         UUID userId = UUID.randomUUID();
-        User user = User.builder()
+        User user = new User.Builder()
                 .id(userId)
                 .email("user@example.com")
                 .name("Test User")
@@ -92,7 +92,7 @@ class AdminServiceTest {
     @Test
     void deleteUser_shouldDeleteUserSuccessfully() {
         UUID userId = UUID.randomUUID();
-        User user = User.builder()
+        User user = new User.Builder()
                 .id(userId)
                 .email("user@example.com")
                 .name("Test User")

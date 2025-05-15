@@ -10,13 +10,10 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -25,12 +22,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.validation.constraints.Email;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Getter;
 
 @Entity
 @Table(name = "users")
@@ -58,7 +49,6 @@ public final class User {
             orphanRemoval = true)
     private Address address;
 
-    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -80,6 +70,8 @@ public final class User {
         this.roles = builder.roles;
         this.refreshTokens = builder.refreshTokens;
         this.enabled = builder.enabled;
+        this.mobileNumber = builder.mobileNumber;
+        this.address = builder.address;
     }
 
     public static class Builder {
@@ -90,6 +82,8 @@ public final class User {
         private Set<Role> roles = new HashSet<>();
         private Set<RefreshToken> refreshTokens = new HashSet<>();
         private Boolean enabled = true;
+        private String mobileNumber;
+        private Address address;
 
         public Builder id(final UUID id) {
             this.id = id;
@@ -118,6 +112,16 @@ public final class User {
 
         public Builder enabled(final Boolean enabled) {
             this.enabled = enabled;
+            return this;
+        }
+
+        public Builder address(final Address address) {
+            this.address = address;
+            return this;
+        }
+
+        public Builder mobileNumber(final String mobileNumber) {
+            this.mobileNumber = mobileNumber;
             return this;
         }
 
