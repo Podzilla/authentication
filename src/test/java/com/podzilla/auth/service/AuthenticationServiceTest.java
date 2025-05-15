@@ -10,6 +10,10 @@ import com.podzilla.auth.model.Role;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.RoleRepository;
 import com.podzilla.auth.repository.UserRepository;
+import com.podzilla.mq.EventPublisher;
+import com.podzilla.mq.EventsConstants;
+import com.podzilla.mq.events.BaseEvent;
+import com.podzilla.mq.events.CustomerRegisteredEvent;
 import com.podzilla.mq.events.DeliveryAddress;
 import jakarta.servlet.http.HttpServletRequest; // Added import
 import jakarta.servlet.http.HttpServletResponse;
@@ -55,6 +59,8 @@ class AuthenticationServiceTest {
     private HttpServletResponse httpServletResponse;
     @Mock // Added mock for HttpServletRequest
     private HttpServletRequest httpServletRequest;
+    @Mock
+    private EventPublisher eventPublisher;
 
     @InjectMocks
     private AuthenticationService authenticationService;
@@ -104,6 +110,9 @@ class AuthenticationServiceTest {
         when(passwordEncoder.encode(signupRequest.getPassword())).thenReturn("encodedPassword");
         when(roleRepository.findByErole(ERole.ROLE_USER)).thenReturn(Optional.of(userRole));
         when(userRepository.save(any(User.class))).thenReturn(user); // Return the saved user
+        // mock publish event in event publisher void method
+        doNothing().when(eventPublisher).publishEvent(any(EventsConstants.EventMetadata.class),
+                any(CustomerRegisteredEvent.class));
 
         // Act
         authenticationService.registerAccount(signupRequest);

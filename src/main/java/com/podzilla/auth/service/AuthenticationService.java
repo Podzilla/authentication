@@ -113,7 +113,7 @@ public class AuthenticationService {
         checkNotNullValidationException(role, "Role_USER not found.");
 
         account.setRoles(Collections.singleton(role));
-        userRepository.save(account);
+        account = userRepository.save(account);
 
         eventPublisher.publishEvent(EventsConstants.CUSTOMER_REGISTERED,
                 new CustomerRegisteredEvent(account.getId().toString(),
