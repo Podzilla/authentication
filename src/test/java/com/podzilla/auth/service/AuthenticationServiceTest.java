@@ -155,7 +155,6 @@ class AuthenticationServiceTest {
     void registerAccount_shouldHandleRoleNotFoundGracefully() {
         // Arrange - Simulate role not found in DB
         when(userRepository.existsByEmail(signupRequest.getEmail())).thenReturn(false);
-        when(passwordEncoder.encode(signupRequest.getPassword())).thenReturn("encodedPassword");
         when(roleRepository.findByErole(ERole.ROLE_USER)).thenReturn(Optional.empty()); // Role not found
 
         // Act
@@ -168,7 +167,6 @@ class AuthenticationServiceTest {
 
         // Assert
         verify(userRepository).existsByEmail(signupRequest.getEmail());
-        verify(passwordEncoder).encode(signupRequest.getPassword());
         verify(roleRepository).findByErole(ERole.ROLE_USER);
     }
 
