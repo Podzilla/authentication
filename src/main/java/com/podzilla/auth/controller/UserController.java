@@ -1,18 +1,17 @@
 package com.podzilla.auth.controller;
 
+import com.podzilla.auth.dto.UpdateRequest;
+import com.podzilla.auth.dto.UserDetailsRequest;
 import com.podzilla.auth.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
@@ -27,14 +26,24 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PutMapping("/update/{userId}")
+    @PutMapping("/update")
     @Operation(summary = "Update user name",
             description = "Allows user to update their name.")
     @ApiResponse(responseCode = "200",
             description = "User profile updated successfully")
-    public void updateProfile(@PathVariable final UUID userId,
-                              @Valid @RequestBody final String name) {
-        LOGGER.debug("Received updateProfile request for userId={}", userId);
-        userService.updateUserProfile(userId, name);
+    public void updateProfile(@RequestBody final UpdateRequest
+                                      updateRequest) {
+        LOGGER.debug("Received updateProfile request");
+        userService.updateUserProfile(updateRequest);
+    }
+
+    @GetMapping("/details")
+    @Operation(summary = "Get user details",
+            description = "Fetches the details of the current user.")
+    @ApiResponse(responseCode = "200",
+            description = "User details fetched successfully")
+    public UserDetailsRequest getUserDetails() {
+        LOGGER.debug("Received getUserDetails request");
+        return userService.getUserDetails();
     }
 }

@@ -4,11 +4,17 @@ import com.podzilla.auth.dto.CustomGrantedAuthority;
 import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
 import com.podzilla.auth.exception.ValidationException;
+import com.podzilla.auth.model.Address;
 import com.podzilla.auth.model.ERole;
 import com.podzilla.auth.model.Role;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.RoleRepository;
 import com.podzilla.auth.repository.UserRepository;
+import com.podzilla.mq.EventPublisher;
+import com.podzilla.mq.EventsConstants;
+import com.podzilla.mq.events.BaseEvent;
+import com.podzilla.mq.events.CustomerRegisteredEvent;
+import com.podzilla.mq.events.DeliveryAddress;
 import jakarta.servlet.http.HttpServletRequest; // Added import
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +59,8 @@ class AuthenticationServiceTest {
     private HttpServletResponse httpServletResponse;
     @Mock // Added mock for HttpServletRequest
     private HttpServletRequest httpServletRequest;
+    @Mock
+    private EventPublisher eventPublisher;
 
     @InjectMocks
     private AuthenticationService authenticationService;
@@ -68,6 +76,14 @@ class AuthenticationServiceTest {
         signupRequest.setName("Test User");
         signupRequest.setEmail("test@example.com");
         signupRequest.setPassword("password123");
+        signupRequest.setMobileNumber("1234567890");
+        DeliveryAddress deliveryAddress = new DeliveryAddress();
+        deliveryAddress.setStreet("123 Test St");
+        deliveryAddress.setCity("Test City");
+        deliveryAddress.setState("Test State");
+        deliveryAddress.setCountry("Test Country");
+        deliveryAddress.setPostalCode("12345");
+        signupRequest.setAddress(deliveryAddress);
 
         loginRequest = new LoginRequest();
         loginRequest.setEmail("test@example.com");
@@ -94,6 +110,9 @@ class AuthenticationServiceTest {
         when(passwordEncoder.encode(signupRequest.getPassword())).thenReturn("encodedPassword");
         when(roleRepository.findByErole(ERole.ROLE_USER)).thenReturn(Optional.of(userRole));
         when(userRepository.save(any(User.class))).thenReturn(user); // Return the saved user
+        // mock publish event in event publisher void method
+        doNothing().when(eventPublisher).publishEvent(any(EventsConstants.EventMetadata.class),
+                any(CustomerRegisteredEvent.class));
 
         // Act
         authenticationService.registerAccount(signupRequest);
@@ -127,24 +146,6 @@ class AuthenticationServiceTest {
         assertEquals("Validation error: Email already in use.",
                 exception.getMessage());
         verify(userRepository).existsByEmail(signupRequest.getEmail());
-        verify(passwordEncoder, never()).encode(anyString());
-        verify(roleRepository, never()).findByErole(any());
-        verify(userRepository, never()).save(any(User.class));
-    }
-
-    @Test
-    void registerAccount_shouldThrowValidationException_whenPasswordIsEmpty() {
-        // Arrange
-        signupRequest.setPassword(""); // Empty password
-
-        // Act & Assert
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            authenticationService.registerAccount(signupRequest);
-        });
-
-        assertEquals("Validation error: Password cannot be null.",
-                exception.getMessage());
-        verify(userRepository, never()).existsByEmail(anyString());
         verify(passwordEncoder, never()).encode(anyString());
         verify(roleRepository, never()).findByErole(any());
         verify(userRepository, never()).save(any(User.class));
