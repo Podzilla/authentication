@@ -1,14 +1,19 @@
 package com.podzilla.auth.service;
 
+import com.podzilla.auth.dto.CustomUserDetails;
 import com.podzilla.auth.dto.LoginRequest;
 import com.podzilla.auth.dto.SignupRequest;
 import com.podzilla.auth.exception.InvalidActionException;
 import com.podzilla.auth.exception.ValidationException;
+import com.podzilla.auth.model.Address;
 import com.podzilla.auth.model.ERole;
 import com.podzilla.auth.model.Role;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.RoleRepository;
 import com.podzilla.auth.repository.UserRepository;
+import com.podzilla.mq.EventPublisher;
+import com.podzilla.mq.EventsConstants;
+import com.podzilla.mq.events.CustomerRegisteredEvent;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.AccessDeniedException;
@@ -31,18 +36,21 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final TokenService tokenService;
     private final RoleRepository roleRepository;
+    private final EventPublisher eventPublisher;
 
     public AuthenticationService(
             final AuthenticationManager authenticationManager,
             final PasswordEncoder passwordEncoder,
             final UserRepository userRepository,
             final TokenService tokenService,
-            final RoleRepository roleRepository) {
+            final RoleRepository roleRepository,
+            final EventPublisher eventPublisher) {
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.tokenService = tokenService;
         this.roleRepository = roleRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     public String login(final LoginRequest loginRequest,
@@ -71,15 +79,6 @@ public class AuthenticationService {
     public void registerAccount(final SignupRequest signupRequest) {
         checkUserLoggedIn("User cannot register while logged in.");
 
-        checkNotNullValidationException(signupRequest,
-                "Signup request cannot be null.");
-        checkNotNullValidationException(signupRequest.getEmail(),
-                "Email cannot be null.");
-        checkNotNullValidationException(signupRequest.getPassword(),
-                "Password cannot be null.");
-        checkNotNullValidationException(signupRequest.getName(),
-                "Name cannot be null.");
-
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new ValidationException("Email already in use.");
         }
@@ -87,6 +86,18 @@ public class AuthenticationService {
         Role role = roleRepository.findByErole(ERole.ROLE_USER).orElse(null);
 
         checkNotNullValidationException(role, "Role_USER not found.");
+        if (userRepository.existsByMobileNumber(
+                signupRequest.getMobileNumber())) {
+            throw new ValidationException("Mobile number already in use.");
+        }
+
+        Address address = Address.builder()
+                .street(signupRequest.getAddress().getStreet())
+                .city(signupRequest.getAddress().getCity())
+                .state(signupRequest.getAddress().getState())
+                .country(signupRequest.getAddress().getCountry())
+                .postalCode(signupRequest.getAddress().getPostalCode())
+                .build();
 
         User account =
                 new User.Builder()
@@ -96,9 +107,16 @@ public class AuthenticationService {
                                 passwordEncoder.encode(
                                         signupRequest.getPassword()))
                         .roles(Collections.singleton(role))
+                        .mobileNumber(signupRequest.getMobileNumber())
+                        .address(address)
                         .build();
+        address.setUser(account);
 
-        userRepository.save(account);
+        account = userRepository.save(account);
+
+        eventPublisher.publishEvent(EventsConstants.CUSTOMER_REGISTERED,
+                new CustomerRegisteredEvent(account.getId().toString(),
+                        account.getName()));
     }
 
     public void logoutUser(
@@ -123,24 +141,42 @@ public class AuthenticationService {
         }
     }
 
-    public UserDetails getCurrentUserDetails() {
+    public void addUserDetailsInHeader(
+            final HttpServletResponse response) {
+
+        CustomUserDetails userDetails = getCurrentUserDetails();
+        String email = userDetails.getUsername();
+        StringBuilder roles = new StringBuilder();
+        userDetails.getAuthorities().forEach((authority) -> {
+            if (!roles.isEmpty()) {
+                roles.append(", ");
+            }
+            roles.append(authority.getAuthority());
+        });
+        setRoleAndEmailInHeader(response, email, roles.toString(),
+                userDetails.getId().toString());
+    }
+
+    public static CustomUserDetails getCurrentUserDetails() {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
-
         Object principal = authentication.getPrincipal();
-        if (principal instanceof UserDetails) {
-            return (UserDetails) principal;
+        if (principal instanceof CustomUserDetails) {
+            return (CustomUserDetails) principal;
         } else {
             throw new InvalidActionException(
                     "User details not saved correctly.");
         }
     }
 
-    private void checkNotNullValidationException(final String value,
-                                                 final String message) {
-        if (value == null || value.isEmpty()) {
-            throw new ValidationException(message);
-        }
+    private void setRoleAndEmailInHeader(
+            final HttpServletResponse response,
+            final String email,
+            final String roles,
+            final String id) {
+        response.setHeader("X-User-Email", email);
+        response.setHeader("X-User-Roles", roles);
+        response.setHeader("X-User-Id", id);
     }
 
     private void checkNotNullValidationException(final Object value,
