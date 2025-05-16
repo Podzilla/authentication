@@ -1,6 +1,5 @@
 package com.podzilla.auth.dto;
 
-import com.podzilla.mq.events.DeliveryAddress;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

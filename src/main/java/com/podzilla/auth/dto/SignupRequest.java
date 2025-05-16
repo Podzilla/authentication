@@ -1,6 +1,5 @@
 package com.podzilla.auth.dto;
 
-import com.podzilla.mq.events.DeliveryAddress;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
