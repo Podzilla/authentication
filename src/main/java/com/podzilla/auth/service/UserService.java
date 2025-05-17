@@ -1,6 +1,7 @@
 package com.podzilla.auth.service;
 
 import com.podzilla.auth.dto.CustomUserDetails;
+import com.podzilla.auth.dto.DeliveryAddress;
 import com.podzilla.auth.dto.UpdateRequest;
 import com.podzilla.auth.dto.UserDetailsRequest;
 import com.podzilla.auth.exception.NotFoundException;
@@ -9,7 +10,6 @@ import com.podzilla.auth.model.Address;
 import com.podzilla.auth.model.User;
 import com.podzilla.auth.repository.AddressRepository;
 import com.podzilla.auth.repository.UserRepository;
-import com.podzilla.mq.events.DeliveryAddress;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

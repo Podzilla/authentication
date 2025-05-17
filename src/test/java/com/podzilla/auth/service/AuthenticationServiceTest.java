@@ -14,7 +14,7 @@ import com.podzilla.mq.EventPublisher;
 import com.podzilla.mq.EventsConstants;
 import com.podzilla.mq.events.BaseEvent;
 import com.podzilla.mq.events.CustomerRegisteredEvent;
-import com.podzilla.mq.events.DeliveryAddress;
+import com.podzilla.auth.dto.DeliveryAddress;
 import jakarta.servlet.http.HttpServletRequest; // Added import
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;

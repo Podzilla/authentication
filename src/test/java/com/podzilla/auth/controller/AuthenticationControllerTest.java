@@ -11,7 +11,7 @@ import com.podzilla.auth.repository.AddressRepository;
 import com.podzilla.auth.repository.RoleRepository;
 import com.podzilla.auth.repository.UserRepository;
 import com.podzilla.auth.service.TokenService; // Assuming you have a JwtService
-import com.podzilla.mq.events.DeliveryAddress;
+import com.podzilla.auth.dto.DeliveryAddress;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
