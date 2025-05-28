@@ -117,4 +117,4 @@ We welcome contributions to enhance the Authentication Microservice! To contribu
 7. Open a pull request with a detailed description of your changes.
 8. Ensure your PR passes CI/CD checks.
 
-Please follow the code style guidelines and include tests for new features or bug fixes.
+Please follow the code style guidelines and include tests for new features or bugfixes.
